@@ -1,4 +1,4 @@
-use std::{any::Any, collections::HashMap};
+use std::{any::Any, collections::HashMap, string};
 
 #[derive(Debug, Eq, PartialEq, Hash, Clone)]
 pub enum TokenType {
@@ -31,6 +31,7 @@ pub fn tokenise(source: String) -> Vec<Token> {
     let mut tokens: Vec<Token> = Vec::new();
     while source_split.len() > 0{
         let mut is_alphanumeric = false;
+        let mut is_string_literal = false;
         if source_split[0] == '('{
             tokens.push(Token {
                 token_type: TokenType::OpenBracket
@@ -102,6 +103,39 @@ pub fn tokenise(source: String) -> Vec<Token> {
             tokens.push(Token {
                 token_type: TokenType::EOL
             });
+        } else if source_split[0] == '"'{
+            let mut string_literal: Vec<char> = Vec::new();
+
+            is_string_literal = true;
+            source_split.remove(0);
+
+            while source_split.len() > 0 && source_split[0] != '"' {
+                string_literal.push(source_split[0]);
+                source_split.remove(0);
+            }
+
+            let string_literal_string: String = string_literal.iter().collect();
+            
+            tokens.push(Token {
+                token_type: TokenType::StringLiteral(string_literal_string),
+            });
+        } else if source_split[0] == '\''{
+            let mut string_literal: Vec<char> = Vec::new();
+
+            is_string_literal = true;
+            source_split.remove(0);
+
+            while source_split.len() > 0 && source_split[0] != '\'' {
+                string_literal.push(source_split[0]);
+                source_split.remove(0);
+            }
+
+            let string_literal_string: String = string_literal.iter().collect();
+            
+            tokens.push(Token {
+                token_type: TokenType::StringLiteral(string_literal_string),
+            });
+
         } else if source_split[0].is_ascii_alphabetic(){
             let mut identifier: Vec<char> = Vec::new();
 
