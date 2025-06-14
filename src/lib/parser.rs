@@ -1,4 +1,4 @@
-use crate::lib::lexer::TokenType;
+use crate::lib::lexer::Token;
 
 use super::lexer;
 
@@ -14,14 +14,70 @@ pub enum NodeType {
 #[derive(Debug, Clone)]
 pub struct Node{ // Node
     node_type: NodeType,
-    body: Vec<Node>,
-    tokens: Vec<lexer::Token>
+    value: Option<Token>,
+    body: Vec<Node>
 }
 impl Node { // Master node will ALWAYS be of type Program and will always have all tokens in tokens
-    fn generate_ast(&mut self){
-        while let lexer::TokenType::EOF = self.tokens[0].token_type {
-            self.tokens.remove(0);
-        } 
+    fn parse_stmt(&mut self, tokens: &mut lexer::TokenStream) -> Node{
+        self.parse_expr(tokens)
+    }
+
+    fn parse_expr(&mut self, tokens: &mut lexer::TokenStream) -> Node{
+        self.parse_additive_expr(tokens)
+    }
+
+    fn parse_additive_expr(&mut self, tokens: &mut lexer::TokenStream) -> Node{
+        let mut left: Node = self.parse_multiplicative_expr(tokens);
+        tokens.pop();
+        while matches!(&tokens.at().token_type, lexer::TokenType::Operator(op) if op == "+" || op == "-"){
+            let operator = tokens.at();
+            tokens.pop();
+            let right = self.parse_multiplicative_expr(tokens);
+            left = Node {
+                node_type: NodeType::BinaryExpr(operator.token_type.extract_operator().unwrap().to_string()),
+                value: None,
+                body: vec![left, right]
+            };
+        }
+        left
+    }
+
+    fn parse_primary_expr(&mut self, tokens: &mut lexer::TokenStream) -> Node{
+        match &tokens.at().token_type{
+            lexer::TokenType::Integer(_) => {
+                Node { node_type: NodeType::NumericLiteral, value: Some(tokens.at()), body: vec![] }
+            },
+            lexer::TokenType::Float(_) => {
+                Node { node_type: NodeType::NumericLiteral, value: Some(tokens.at()), body: vec![] }
+            },
+            _ => panic!("{:?}", tokens.at().token_type)
+        }
+    }
+    
+    fn parse_multiplicative_expr(& mut self, tokens: &mut lexer::TokenStream) -> Node{
+        let mut left: Node = self.parse_primary_expr(tokens);
+        tokens.pop();
+        while matches!(&tokens.at().token_type, lexer::TokenType::Operator(op) if op == "*" || op == "/"){
+            let operator = tokens.at();
+            tokens.pop();
+            let right = self.parse_primary_expr(tokens);
+            left = Node {
+                node_type: NodeType::BinaryExpr(operator.token_type.extract_operator().unwrap().to_string()),
+                value: None,
+                body: vec![left, right]
+            };
+        }
+        left
+
+    }
+
+    fn generate_ast(&mut self, tokens: &mut lexer::TokenStream){
+        while !matches!(tokens.at().token_type, lexer::TokenType::EOF) {
+            let parsed = self.parse_stmt(tokens);
+            self.body.push(parsed);
+            // println!("{:?}",self.body);
+            // tokens.pop();
+        }
     }
 }
 
@@ -29,11 +85,13 @@ pub fn generate_ast(source: String) -> Node {
 
     let mut program = Node{
         node_type: NodeType::Program,
-        body: vec![],
-        tokens: lexer::tokenise(source)
+        value: None,
+        body: vec![]
     };
 
-    program.generate_ast();
+    let mut tokens = lexer::tokenise(source);
+
+    program.generate_ast(&mut tokens);
 
     program
 
