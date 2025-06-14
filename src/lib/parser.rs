@@ -64,8 +64,7 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
                     tokens.pop();
                     parsed
                 } else {
-                    println!("{:?}", tokens.at().token_type);
-                    panic!("Unexpected token")
+                    panic!("Unexpected token within brackets - expected closing bracket")
                 }
                 
                 
