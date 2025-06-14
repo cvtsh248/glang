@@ -1,8 +1,7 @@
-use std::{any::Any, collections::HashMap, string};
-
-#[derive(Debug, Eq, PartialEq, Hash, Clone)]
+#[derive(Debug, Clone)]
 pub enum TokenType {
-    Number(i64),
+    Integer(i64),
+    Float(f64),
     Identifier(String),
     StringLiteral(String),
     Operator(String),
@@ -10,20 +9,81 @@ pub enum TokenType {
     CloseBracket,
     Let,
     Punctuation(String),
-    EOL
+    EOL,
+    EOF
 }
 impl TokenType {
-    fn check_reserved_keywords(keyword: &String) -> Option<TokenType>{
-        let reserved: HashMap<String, TokenType> = HashMap::from([
-            ("let".to_string(),TokenType::Let),
-        ]);
-        reserved.get(keyword).cloned()
+    fn check_reserved_keywords(word: &str) -> Option<TokenType>{
+        match word{
+            "let" => Some(TokenType::Let),
+            _=>None
+        }
+        
     }
+
+    pub fn extract_operator(&self) -> Option<&str> {
+        if let TokenType::Operator(op) = self {
+            Some(op)
+        } else {
+            None
+        }
+    }
+
+    pub fn extract_int_value(&self) -> Option<&i64> {
+        if let TokenType::Integer(val) = self {
+            Some(val)
+        } else {
+            None
+        }
+    }
+
+    pub fn extract_float_value(&self) -> Option<&f64> {
+        if let TokenType::Float(val) = self {
+            Some(val)
+        } else {
+            None
+        }
+    }
+
+    pub fn extract_str_value(&self) -> Option<&str> {
+        if let TokenType::Identifier(str) = self {
+            Some(str)
+        } else if  let TokenType::Identifier(str) = self {
+            Some(str)
+        } else if  let TokenType::StringLiteral(str) = self {
+            Some(str)
+        } else if  let TokenType::Punctuation(str) = self {
+            Some(str)
+        } else {
+            None
+        }
+    }
+
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Token {
-    token_type: TokenType,
+    pub token_type: TokenType,
+}
+
+#[derive(Debug, Clone)]
+pub struct TokenStream {
+    pub tokens: Vec<Token>,
+    pub current_pos: usize
+}
+impl TokenStream {
+    // Last in first out
+    pub fn push(&mut self, token: Token){
+        self.tokens.push(token);
+    }
+
+    pub fn pop(&mut self){
+        self.current_pos += 1;
+    }
+
+    pub fn at(&self) -> Token{
+        self.tokens[self.current_pos].clone()
+    }
 }
 
 pub fn tokenise(source: String) -> Vec<Token> {
@@ -95,10 +155,6 @@ pub fn tokenise(source: String) -> Vec<Token> {
                     token_type: TokenType::Operator("=".to_string())
                 });
             }
-        } else if source_split[0] == '.' {
-            tokens.push(Token {
-                token_type: TokenType::Punctuation(".".to_string())
-            });
         } else if source_split[0] == ';' {
             tokens.push(Token {
                 token_type: TokenType::EOL
@@ -148,9 +204,11 @@ pub fn tokenise(source: String) -> Vec<Token> {
 
             let identifier_string: String = identifier.into_iter().collect();
 
-            if TokenType::check_reserved_keywords(&identifier_string) == Some(TokenType::Let,) {
+            let token_type = TokenType::check_reserved_keywords(&identifier_string);
+
+            if token_type.is_some() {
                     tokens.push(Token {
-                    token_type: TokenType::Let
+                    token_type: token_type.expect("this is impossible to trigger")
                 });
             } else {
                 tokens.push(Token {
@@ -161,19 +219,33 @@ pub fn tokenise(source: String) -> Vec<Token> {
 
         } else if source_split[0].is_ascii_digit(){
             let mut numeral: Vec<char> = Vec::new();
-            while source_split.len() > 0 && source_split[0].is_ascii_digit(){
+            while source_split.len() > 0 && (source_split[0].is_ascii_digit() || source_split[0] == '.'){
                 numeral.push(source_split[0]);
                 source_split.remove(0);
             }
 
-            let number_string: String = numeral.into_iter().collect();
-            let number_proper: i64 = number_string.parse::<i64>().unwrap();
+            let numeral_string: String = numeral.into_iter().collect();
+
+            if numeral_string.contains("."){
+                let float_proper: f64 = numeral_string.parse::<f64>().unwrap();
+                tokens.push(Token {
+                                token_type: TokenType::Float(float_proper)
+                            })
+            } else {
+                let integer_proper: i64 = numeral_string.parse::<i64>().unwrap();
+                tokens.push(Token {
+                    token_type: TokenType::Integer(integer_proper)
+                })
+            }
+            
 
             is_alphanumeric = true;
             
+
+        } else if source_split[0] == '.' {
             tokens.push(Token {
-                token_type: TokenType::Number(number_proper)
-            })
+                token_type: TokenType::Punctuation(".".to_string())
+            });
         } else if source_split[0] == ' ' || source_split[0] == '\n'{
             // Do nothing
         }
@@ -183,5 +255,6 @@ pub fn tokenise(source: String) -> Vec<Token> {
         }
         
     }
+    tokens.push(Token { token_type: TokenType::EOF });
     tokens
 }
