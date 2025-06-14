@@ -56,12 +56,15 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
             },
             lexer::TokenType::OpenBracket => {
                 tokens.pop();
-                let parsed = self.parse_primary_expr(tokens);
-                println!("{:?}", parsed);
-                tokens.pop();
+                let parsed: Node = self.parse_additive_expr(tokens);
+                // tokens.pop();
+                // println!("{:?}", parsed);
+
                 if matches!(tokens.at().token_type, lexer::TokenType::CloseBracket){
+                    tokens.pop();
                     parsed
                 } else {
+                    println!("{:?}", tokens.at().token_type);
                     panic!("Unexpected token")
                 }
                 
