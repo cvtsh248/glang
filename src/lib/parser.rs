@@ -28,7 +28,7 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
 
     fn parse_additive_expr(&mut self, tokens: &mut lexer::TokenStream) -> Node{
         let mut left: Node = self.parse_multiplicative_expr(tokens);
-        tokens.pop();
+        // tokens.pop();
         while matches!(&tokens.at().token_type, lexer::TokenType::Operator(op) if op == "+" || op == "-"){
             let operator = tokens.at();
             tokens.pop();
@@ -45,18 +45,36 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
     fn parse_primary_expr(&mut self, tokens: &mut lexer::TokenStream) -> Node{
         match &tokens.at().token_type{
             lexer::TokenType::Integer(_) => {
-                Node { node_type: NodeType::NumericLiteral, value: Some(tokens.at()), body: vec![] }
+                let ret = Node { node_type: NodeType::NumericLiteral, value: Some(tokens.at()), body: vec![] };
+                tokens.pop();
+                ret
             },
             lexer::TokenType::Float(_) => {
-                Node { node_type: NodeType::NumericLiteral, value: Some(tokens.at()), body: vec![] }
+                let ret = Node { node_type: NodeType::NumericLiteral, value: Some(tokens.at()), body: vec![] };
+                tokens.pop();
+                ret
             },
+            lexer::TokenType::OpenBracket => {
+                tokens.pop();
+                let parsed = self.parse_primary_expr(tokens);
+                println!("{:?}", parsed);
+                tokens.pop();
+                if matches!(tokens.at().token_type, lexer::TokenType::CloseBracket){
+                    parsed
+                } else {
+                    panic!("Unexpected token")
+                }
+                
+                
+            }
             _ => panic!("{:?}", tokens.at().token_type)
         }
+        
     }
     
     fn parse_multiplicative_expr(& mut self, tokens: &mut lexer::TokenStream) -> Node{
         let mut left: Node = self.parse_primary_expr(tokens);
-        tokens.pop();
+        // tokens.pop();
         while matches!(&tokens.at().token_type, lexer::TokenType::Operator(op) if op == "*" || op == "/"){
             let operator = tokens.at();
             tokens.pop();
