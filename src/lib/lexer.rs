@@ -155,6 +155,30 @@ pub fn tokenise(source: String) -> TokenStream {
                 });
                 source_datastream.pop()
                 // source_split.remove(1);
+            } else if source_datastream.characters.len() - source_datastream.current_pos > 1 && source_datastream.characters[source_datastream.current_pos+1].is_ascii_digit() {
+                // Negative numbers
+                source_datastream.pop();
+                let mut numeral: Vec<char> = Vec::new();
+                while source_datastream.current_pos < source_datastream.characters.len() && (source_datastream.at().is_ascii_digit() || source_datastream.at() == '.'){
+                    numeral.push(source_datastream.at());
+                    source_datastream.pop();
+                }
+
+                let numeral_string: String = numeral.into_iter().collect();
+
+                if numeral_string.contains("."){
+                    let float_proper: f64 = numeral_string.parse::<f64>().unwrap();
+                    tokens.push(Token {
+                                    token_type: TokenType::Float(-1.0*float_proper)
+                                })
+                } else {
+                    let integer_proper: i64 = numeral_string.parse::<i64>().unwrap();
+                    tokens.push(Token {
+                        token_type: TokenType::Integer(-1*integer_proper)
+                    })
+                }
+                
+                is_alphanumeric = true;
             } else {
                 tokens.push(Token {
                     token_type: TokenType::Operator("-".to_string())
