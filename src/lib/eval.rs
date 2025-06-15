@@ -309,7 +309,9 @@ fn eval_binary_expr(node: &parser::Node) -> RuntimeVal {
     let left = eval(&node.body[0]);
     let right = eval(&node.body[1]);
 
-    if matches!(left.runtime_val_type, RuntimeValType::NumericInteger(_)){
+    if matches!(left.runtime_val_type, RuntimeValType::NumericInteger(_)) && matches!(right.runtime_val_type, RuntimeValType::NumericInteger(_)){
+        eval_numeric_binary_expr(&left, &right, node.node_type.extract_binexp_operator().unwrap())
+    } else if matches!(left.runtime_val_type, RuntimeValType::NumericFloat(_)) && matches!(right.runtime_val_type, RuntimeValType::NumericFloat(_)) {
         eval_numeric_binary_expr(&left, &right, node.node_type.extract_binexp_operator().unwrap())
     } else {
         panic!()
