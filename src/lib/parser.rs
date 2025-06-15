@@ -1,5 +1,3 @@
-use crate::lib::lexer::Token;
-
 use super::lexer;
 
 #[derive(Debug, Clone)]
@@ -10,12 +8,20 @@ pub enum NodeType {
     Identifier,
     BinaryExpr(String)
 }
-
+impl NodeType {
+    pub fn extract_binexp_operator(&self) -> Option<&str> {
+        if let NodeType::BinaryExpr(op) = self {
+            Some(op)
+        } else {
+            None
+        }
+    }
+}
 #[derive(Debug, Clone)]
 pub struct Node{ // Node
-    node_type: NodeType,
-    value: Option<Token>,
-    body: Vec<Node>
+    pub node_type: NodeType,
+    pub value: Option<lexer::Token>,
+    pub body: Vec<Node>
 }
 impl Node { // Master node will ALWAYS be of type Program and will always have all tokens in tokens
     fn parse_stmt(&mut self, tokens: &mut lexer::TokenStream) -> Node{
