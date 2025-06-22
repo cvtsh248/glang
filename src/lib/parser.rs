@@ -72,8 +72,11 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
                 } else {
                     panic!("Unexpected token within brackets - expected closing bracket")
                 }
-                
-                
+            },
+            lexer::TokenType::Identifier(_) => {
+                let ret = Node {node_type: NodeType::Identifier, value: Some(tokens.at()), body: vec![]};
+                tokens.pop();
+                ret
             }
             _ => panic!("{:?}", tokens.at().token_type)
         }

@@ -1,7 +1,10 @@
+use std::env;
+
 use super::lexer;
 use super::parser;
+use super::environment;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum RuntimeValType {
     Null,
     NumericInteger(i64),
@@ -27,12 +30,12 @@ impl RuntimeValType {
 
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct RuntimeVal {
-    runtime_val_type : RuntimeValType,
+    pub runtime_val_type : RuntimeValType,
 }
 
-pub fn eval(node: &parser::Node) -> RuntimeVal {
+pub fn eval(node: &parser::Node, env: &environment::Environment) -> RuntimeVal {
     match node.node_type {
         parser::NodeType::NumericLiteral => {
             let token = &node.value.as_ref().unwrap();
@@ -49,19 +52,28 @@ pub fn eval(node: &parser::Node) -> RuntimeVal {
                     RuntimeVal {
                         runtime_val_type: RuntimeValType::NumericInteger(*token_value),
                     }
-                }
+                },
                 _=>panic!()
 
             }
         },
         parser::NodeType::BinaryExpr(_) => {
-            eval_binary_expr(node)
+            eval_binary_expr(node, env)
+        },
+        parser::NodeType::Identifier => {
+            eval_identifier(node, env)
         }
         _ => {
             panic!()
         }
     }
 }
+
+pub fn eval_identifier(identifier: &parser::Node, env: &environment::Environment) -> RuntimeVal{
+    let identifier_string = identifier.value.as_ref().unwrap().token_type.extract_str_value().unwrap().to_string();
+    env.lookup_variable(&identifier_string)
+}
+
 
 pub fn eval_numeric_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator: &str) -> RuntimeVal{
     match operator {
@@ -84,7 +96,8 @@ pub fn eval_numeric_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator:
                         RuntimeVal {
                             runtime_val_type: RuntimeValType::NumericFloat(*left_value + *right_value)
                         }
-                    }
+                    },
+
                     _ => panic!()
                 }
 
@@ -179,9 +192,9 @@ pub fn eval_numeric_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator:
     }
 }
 
-fn eval_binary_expr(node: &parser::Node) -> RuntimeVal {
-    let left = eval(&node.body[0]);
-    let right = eval(&node.body[1]);
+fn eval_binary_expr(node: &parser::Node, env: &environment::Environment) -> RuntimeVal {
+    let left = eval(&node.body[0], env);
+    let right = eval(&node.body[1], env);
 
     if matches!(left.runtime_val_type, RuntimeValType::NumericInteger(_)) && matches!(right.runtime_val_type, RuntimeValType::NumericInteger(_)){
         eval_numeric_binary_expr(&left, &right, node.node_type.extract_binexp_operator().unwrap())
@@ -192,10 +205,10 @@ fn eval_binary_expr(node: &parser::Node) -> RuntimeVal {
     }
 }
 
-pub fn eval_program(program: &parser::Node) -> RuntimeVal{
+pub fn eval_program(program: &parser::Node, env: &environment::Environment) -> RuntimeVal{
     let mut last_eval: RuntimeVal = RuntimeVal { runtime_val_type: RuntimeValType::Null };
     for node in &program.body {
-        last_eval = eval(node);
+        last_eval = eval(node, env);
     }
     last_eval
 }
