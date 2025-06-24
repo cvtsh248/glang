@@ -35,7 +35,7 @@ pub struct RuntimeVal {
     pub runtime_val_type : RuntimeValType,
 }
 
-pub fn eval(node: &parser::Node, env: &environment::Environment) -> RuntimeVal {
+pub fn eval(node: &parser::Node, env: &mut environment::Environment) -> RuntimeVal {
     match node.node_type {
         parser::NodeType::NumericLiteral => {
             let token = &node.value.as_ref().unwrap();
@@ -62,14 +62,14 @@ pub fn eval(node: &parser::Node, env: &environment::Environment) -> RuntimeVal {
         },
         parser::NodeType::Identifier => {
             eval_identifier(node, env)
-        }
+        },
         _ => {
             panic!()
         }
     }
 }
 
-pub fn eval_identifier(identifier: &parser::Node, env: &environment::Environment) -> RuntimeVal{
+pub fn eval_identifier(identifier: &parser::Node, env: &mut environment::Environment) -> RuntimeVal{
     let identifier_string = identifier.value.as_ref().unwrap().token_type.extract_str_value().unwrap().to_string();
     env.lookup_variable(&identifier_string)
 }
@@ -192,7 +192,7 @@ pub fn eval_numeric_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator:
     }
 }
 
-fn eval_binary_expr(node: &parser::Node, env: &environment::Environment) -> RuntimeVal {
+fn eval_binary_expr(node: &parser::Node, env: &mut environment::Environment) -> RuntimeVal {
     let left = eval(&node.body[0], env);
     let right = eval(&node.body[1], env);
 
@@ -205,7 +205,7 @@ fn eval_binary_expr(node: &parser::Node, env: &environment::Environment) -> Runt
     }
 }
 
-pub fn eval_program(program: &parser::Node, env: &environment::Environment) -> RuntimeVal{
+pub fn eval_program(program: &parser::Node, env: &mut environment::Environment) -> RuntimeVal{
     let mut last_eval: RuntimeVal = RuntimeVal { runtime_val_type: RuntimeValType::Null };
     for node in &program.body {
         last_eval = eval(node, env);

@@ -6,7 +6,7 @@ pub enum NodeType {
     NumericLiteral,
     StringLiteral,
     Identifier,
-    BinaryExpr(String)
+    BinaryExpr(String),
 }
 impl NodeType {
     pub fn extract_binexp_operator(&self) -> Option<&str> {
@@ -77,7 +77,7 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
                 let ret = Node {node_type: NodeType::Identifier, value: Some(tokens.at()), body: vec![]};
                 tokens.pop();
                 ret
-            }
+            },
             _ => panic!("{:?}", tokens.at().token_type)
         }
         

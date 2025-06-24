@@ -221,9 +221,9 @@ pub fn tokenise(source: String) -> TokenStream {
                 });
             }
         } else if source_datastream.at() == ';' {
-            tokens.push(Token {
-                token_type: TokenType::EOL
-            });
+            // tokens.push(Token {
+            //     token_type: TokenType::EOL
+            // });
         } else if source_datastream.at() == '"'{
             let mut string_literal: Vec<char> = Vec::new();
 

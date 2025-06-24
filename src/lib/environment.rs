@@ -15,16 +15,16 @@ pub struct Environment {
 }
 impl Environment {
 
-    pub fn resolve_env(&self, name: &str) -> Environment{
+    pub fn resolve_env(&mut self, name: &str) -> &mut Environment{
 
         for variable in self.variables.clone() {
             if variable.name == name {
-                return self.clone()
+                return self
             }
         }
 
         if !self.parent.is_none() {
-            return self.parent.clone().as_mut().unwrap().resolve_env(name)
+            return self.parent.as_deref_mut().unwrap().resolve_env(name)
         } 
 
 
@@ -42,12 +42,18 @@ impl Environment {
         *value
     }
 
-    pub fn assign_variable(&mut self){
+    pub fn assign_variable(&mut self, identifier: &str, value: &eval::RuntimeVal){
         // identifier.value.as_ref().unwrap().token_type.extract_str_value().unwrap().to_string()
-
+        let env = self.resolve_env(identifier);
+        for (count, variable) in env.variables.clone().iter().enumerate() {
+            if identifier == variable.name {
+                env.variables[count].value = *value;
+            }
+        }
+        panic!("Cannot assign uninitialised variable - {:?}", identifier)
     }
 
-    pub fn lookup_variable(&self, identifier: &str) -> eval::RuntimeVal {
+    pub fn lookup_variable(&mut self, identifier: &str) -> eval::RuntimeVal {
         let env = self.resolve_env(identifier);
         for variable in env.variables.clone() {
             if identifier == variable.name {
