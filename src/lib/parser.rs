@@ -7,6 +7,8 @@ pub enum NodeType {
     StringLiteral,
     Identifier,
     BinaryExpr(String),
+    Assignment,
+    Declaration
 }
 impl NodeType {
     pub fn extract_binexp_operator(&self) -> Option<&str> {
@@ -25,7 +27,24 @@ pub struct Node{ // Node
 }
 impl Node { // Master node will ALWAYS be of type Program and will always have all tokens in tokens
     fn parse_stmt(&mut self, tokens: &mut lexer::TokenStream) -> Node{
-        self.parse_expr(tokens)
+        if matches!(&tokens.at().token_type, lexer::TokenType::Let){ // Declaration
+            tokens.pop();
+            if !matches!(tokens.at().token_type, lexer::TokenType::Identifier(_)){
+                panic!("Expected identifier after let")
+            } else {
+                let mut ret = Node {node_type: NodeType::Declaration, value: Some(tokens.at()), body: vec![]};
+                tokens.pop();
+                while !(matches!(&tokens.at().token_type, lexer::TokenType::EOL) || matches!(&tokens.at().token_type, lexer::TokenType::EOF)) {
+                    tokens.pop();
+                    ret.body.push(self.parse_expr(tokens));
+                    
+                }
+                
+                return ret 
+            }
+        } else {
+            self.parse_expr(tokens)
+        }
     }
 
     fn parse_expr(&mut self, tokens: &mut lexer::TokenStream) -> Node{
@@ -74,8 +93,19 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
                 }
             },
             lexer::TokenType::Identifier(_) => {
-                let ret = Node {node_type: NodeType::Identifier, value: Some(tokens.at()), body: vec![]};
+                let identifier = tokens.at();
+                let ret = Node {node_type: NodeType::Identifier, value: Some(identifier.clone()), body: vec![]};
                 tokens.pop();
+                if matches!(tokens.at().token_type, lexer::TokenType::Operator(val) if val == "="){ // Assignment
+                    // tokens.pop();
+                    let mut body: Vec<Node> = vec![];
+                    while !matches!(tokens.at().token_type, lexer::TokenType::EOF) && !matches!(tokens.at().token_type, lexer::TokenType::EOL) {
+                        tokens.pop();
+                        body.push(self.parse_expr(tokens));
+                    }
+                    let ret = Node {node_type: NodeType::Assignment, value: Some(identifier.clone()), body: body};
+                    return ret
+                }
                 ret
             },
             _ => panic!("{:?}", tokens.at().token_type)

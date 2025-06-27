@@ -63,6 +63,13 @@ pub fn eval(node: &parser::Node, env: &mut environment::Environment) -> RuntimeV
         parser::NodeType::Identifier => {
             eval_identifier(node, env)
         },
+        parser::NodeType::Assignment => {
+            let mut rhs: parser::Node;
+            eval_assignment(node, env)
+        },
+        parser::NodeType::Declaration => {
+            eval_declaration(node, env)
+        }
         _ => {
             panic!()
         }
@@ -72,6 +79,18 @@ pub fn eval(node: &parser::Node, env: &mut environment::Environment) -> RuntimeV
 pub fn eval_identifier(identifier: &parser::Node, env: &mut environment::Environment) -> RuntimeVal{
     let identifier_string = identifier.value.as_ref().unwrap().token_type.extract_str_value().unwrap().to_string();
     env.lookup_variable(&identifier_string)
+}
+
+pub fn eval_assignment(node: &parser::Node, env: &mut environment::Environment) -> RuntimeVal{
+    let identifier_string = node.value.as_ref().unwrap().token_type.extract_str_value().unwrap().to_string();
+    let eval_rhs = eval(&node.body[0], env);
+    env.assign_variable(&identifier_string, &eval_rhs)
+}
+
+pub fn eval_declaration(node: &parser::Node, env: &mut environment::Environment) -> RuntimeVal{
+    let identifier_string = node.value.as_ref().unwrap().token_type.extract_str_value().unwrap().to_string();
+    let eval_rhs = eval(&node.body[0], env);
+    env.declare_variable(&identifier_string, &eval_rhs)
 }
 
 

@@ -220,7 +220,7 @@ pub fn tokenise(source: String) -> TokenStream {
                     token_type: TokenType::Operator("=".to_string())
                 });
             }
-        } else if source_datastream.at() == ';' {
+        } else if source_datastream.at() == ';' || source_datastream.at() == '\n'{
             // tokens.push(Token {
             //     token_type: TokenType::EOL
             // });

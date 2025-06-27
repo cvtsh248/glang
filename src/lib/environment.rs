@@ -1,3 +1,5 @@
+use crate::lib::eval::RuntimeVal;
+
 use super::lexer;
 use super::parser;
 use super::eval;
@@ -42,12 +44,13 @@ impl Environment {
         *value
     }
 
-    pub fn assign_variable(&mut self, identifier: &str, value: &eval::RuntimeVal){
+    pub fn assign_variable(&mut self, identifier: &str, value: &eval::RuntimeVal) -> eval::RuntimeVal{
         // identifier.value.as_ref().unwrap().token_type.extract_str_value().unwrap().to_string()
         let env = self.resolve_env(identifier);
         for (count, variable) in env.variables.clone().iter().enumerate() {
             if identifier == variable.name {
                 env.variables[count].value = *value;
+                return eval::RuntimeVal { runtime_val_type: eval::RuntimeValType::Null }
             }
         }
         panic!("Cannot assign uninitialised variable - {:?}", identifier)
