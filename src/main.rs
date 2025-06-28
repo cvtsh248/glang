@@ -24,7 +24,7 @@ fn main() {
             break;
         }
         let ast = lib::parser::generate_ast(input.to_string());
-        println!("{:?}", ast);
+        // println!("{:?}", ast);
         let result = lib::eval::eval_program(&ast, &mut environment);
         println!("{:?}", result);
     }

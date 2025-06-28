@@ -108,6 +108,11 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
                 }
                 ret
             },
+            lexer::TokenType::StringLiteral(_) => {
+                let ret = Node {node_type: NodeType::StringLiteral, value: Some(tokens.at()), body: vec![]};
+                tokens.pop();
+                ret
+            }
             _ => panic!("{:?}", tokens.at().token_type)
         }
         

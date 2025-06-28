@@ -4,11 +4,12 @@ use super::lexer;
 use super::parser;
 use super::environment;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub enum RuntimeValType {
     Null,
     NumericInteger(i64),
     NumericFloat(f64),
+    StringLiteral(String),
     Runtime
 }
 impl RuntimeValType {
@@ -30,7 +31,7 @@ impl RuntimeValType {
 
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct RuntimeVal {
     pub runtime_val_type : RuntimeValType,
 }
@@ -69,7 +70,14 @@ pub fn eval(node: &parser::Node, env: &mut environment::Environment) -> RuntimeV
         },
         parser::NodeType::Declaration => {
             eval_declaration(node, env)
-        }
+        },
+        parser::NodeType::StringLiteral => {
+            let token = &node.value.as_ref().unwrap();
+            let token_value = token.token_type.extract_str_value().unwrap();
+            RuntimeVal {
+                runtime_val_type: RuntimeValType::StringLiteral(token_value.to_string())
+            }
+        },
         _ => {
             panic!()
         }

@@ -41,7 +41,7 @@ impl Environment {
                 self.variables.push(Variable { name: identifier.to_string(), value: value.clone() });
             }
         }
-        *value
+        value.clone()
     }
 
     pub fn assign_variable(&mut self, identifier: &str, value: &eval::RuntimeVal) -> eval::RuntimeVal{
@@ -49,7 +49,7 @@ impl Environment {
         let env = self.resolve_env(identifier);
         for (count, variable) in env.variables.clone().iter().enumerate() {
             if identifier == variable.name {
-                env.variables[count].value = *value;
+                env.variables[count].value = value.clone();
                 return eval::RuntimeVal { runtime_val_type: eval::RuntimeValType::Null }
             }
         }
