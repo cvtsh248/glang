@@ -166,7 +166,7 @@ pub fn tokenise(source: String) -> TokenStream {
                 });
                 source_datastream.pop()
                 // source_split.remove(1);
-            } else if source_datastream.characters.len() - source_datastream.current_pos > 1 && source_datastream.characters[source_datastream.current_pos+1].is_ascii_digit() {
+            } else if source_datastream.characters.len() - source_datastream.current_pos > 1 && source_datastream.characters[source_datastream.current_pos+1].is_ascii_digit() && !source_datastream.characters[source_datastream.current_pos-1].is_ascii_digit(){
                 // Negative numbers
                 source_datastream.pop();
                 let mut numeral: Vec<char> = Vec::new();
@@ -224,11 +224,25 @@ pub fn tokenise(source: String) -> TokenStream {
                 tokens.push(Token {
                     token_type: TokenType::Operator("==".to_string())
                 });
+
                 source_datastream.pop()
                 // source_split.remove(1);
             } else {
                 tokens.push(Token {
                     token_type: TokenType::Operator("=".to_string())
+                });
+            }
+        } else if source_datastream.at() == '!' {
+            if source_datastream.characters.len() - source_datastream.current_pos > 1 && source_datastream.characters[source_datastream.current_pos+1] == '='{
+                tokens.push(Token {
+                    token_type: TokenType::Operator("!=".to_string())
+                });
+                
+                source_datastream.pop()
+                // source_split.remove(1);
+            } else {
+                tokens.push(Token {
+                    token_type: TokenType::Operator("!".to_string())
                 });
             }
         } else if source_datastream.at() == ';' || source_datastream.at() == '\n'{
@@ -317,7 +331,6 @@ pub fn tokenise(source: String) -> TokenStream {
 
             is_alphanumeric = true;
             
-
         } else if source_datastream.at() == '.' {
             tokens.push(Token {
                 token_type: TokenType::Punctuation(".".to_string())

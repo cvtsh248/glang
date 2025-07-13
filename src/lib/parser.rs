@@ -55,7 +55,7 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
 
     fn parse_equality_expr(&mut self, tokens: &mut lexer::TokenStream) -> Node{
         let mut left: Node = self.parse_additive_expr(tokens);
-        while matches!(&tokens.at().token_type, lexer::TokenType::Operator(op) if op == "==") {
+        while matches!(&tokens.at().token_type, lexer::TokenType::Operator(op) if op == "==" || op == "!=") {
             let operator = tokens.at();
             tokens.pop();
             let right = self.parse_additive_expr(tokens);
@@ -98,15 +98,15 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
             },
             lexer::TokenType::OpenBracket => {
                 tokens.pop();
-                let parsed: Node = self.parse_additive_expr(tokens);
+                let parsed: Node = self.parse_equality_expr(tokens);
                 // tokens.pop();
-                // println!("{:?}", parsed);
+                println!("{:?}", parsed);
 
                 if matches!(tokens.at().token_type, lexer::TokenType::CloseBracket){
                     tokens.pop();
                     parsed
                 } else {
-                    panic!("Unexpected token within brackets - expected closing bracket")
+                    panic!("Unexpected token within brackets - expected closing bracket, got: {:?}",tokens.at().token_type)
                 }
             },
             lexer::TokenType::Identifier(_) => {
