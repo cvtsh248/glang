@@ -3,7 +3,9 @@ use std::io::{self, Write};
 
 mod lib;
 fn main() {
-    let source: String = "let y = 4+x; 2+y;" .to_string();
+    let source: String = 
+    "let chicken = x==6;
+    " .to_string();
     // let tokens = lib::lexer::tokenise(source);
     let ast = lib::parser::generate_ast(source);
     println!("{:?}", ast);

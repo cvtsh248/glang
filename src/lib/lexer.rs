@@ -2,6 +2,7 @@
 pub enum TokenType {
     Integer(i64),
     Float(f64),
+    Boolean(bool),
     Identifier(String),
     StringLiteral(String),
     Operator(String),
@@ -16,6 +17,8 @@ impl TokenType {
     fn check_reserved_keywords(word: &str) -> Option<TokenType>{
         match word{
             "let" => Some(TokenType::Let),
+            "true" => Some(TokenType::Boolean(true)),
+            "false" => Some(TokenType::Boolean(false)),
             _=>None
         }
         
@@ -54,6 +57,14 @@ impl TokenType {
             Some(str)
         } else if  let TokenType::Punctuation(str) = self {
             Some(str)
+        } else {
+            None
+        }
+    }
+
+    pub fn extract_bool_value(&self) -> Option<bool> {
+        if let TokenType::Boolean(boolean) = self {
+            Some(true)
         } else {
             None
         }

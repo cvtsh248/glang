@@ -10,6 +10,7 @@ pub enum RuntimeValType {
     NumericInteger(i64),
     NumericFloat(f64),
     StringLiteral(String),
+    Boolean(bool),
     Runtime
 }
 impl RuntimeValType {
@@ -76,6 +77,13 @@ pub fn eval(node: &parser::Node, env: &mut environment::Environment) -> RuntimeV
             let token_value = token.token_type.extract_str_value().unwrap();
             RuntimeVal {
                 runtime_val_type: RuntimeValType::StringLiteral(token_value.to_string())
+            }
+        },
+        parser::NodeType::Boolean => {
+            let token = &node.value.as_ref().unwrap();
+            let token_value = token.token_type.extract_bool_value().unwrap();
+            RuntimeVal {
+                runtime_val_type: RuntimeValType::Boolean(token_value)
             }
         },
         parser::NodeType::EOL => {
@@ -207,6 +215,33 @@ pub fn eval_numeric_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator:
                         let right_value = right_type.extract_float_value().unwrap();
                         RuntimeVal {
                             runtime_val_type: RuntimeValType::NumericFloat(*left_value / *right_value)
+                        }
+                    }
+                    _ => panic!()
+                }
+
+            } else {
+                panic!("Mismatched types")
+            }
+        },
+        "==" => {
+            let left_type = &left.runtime_val_type;
+            let right_type = &right.runtime_val_type;
+
+            if matches!(left_type, right_type){
+                match left_type {
+                    RuntimeValType::NumericInteger(_) => {
+                        let left_value = left_type.extract_int_value().unwrap();
+                        let right_value = right_type.extract_int_value().unwrap();
+                        RuntimeVal {
+                            runtime_val_type: RuntimeValType::Boolean(*left_value==*right_value)
+                        }
+                    },
+                    RuntimeValType::NumericFloat(_) => {
+                        let left_value = left_type.extract_float_value().unwrap();
+                        let right_value = right_type.extract_float_value().unwrap();
+                        RuntimeVal {
+                            runtime_val_type: RuntimeValType::Boolean(*left_value==*right_value)
                         }
                     }
                     _ => panic!()

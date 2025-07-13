@@ -5,6 +5,7 @@ pub enum NodeType {
     Program,
     NumericLiteral,
     StringLiteral,
+    Boolean,
     Identifier,
     BinaryExpr(String),
     Assignment,
@@ -49,7 +50,22 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
     }
 
     fn parse_expr(&mut self, tokens: &mut lexer::TokenStream) -> Node{
-        self.parse_additive_expr(tokens)
+        self.parse_equality_expr(tokens)
+    }
+
+    fn parse_equality_expr(&mut self, tokens: &mut lexer::TokenStream) -> Node{
+        let mut left: Node = self.parse_additive_expr(tokens);
+        while matches!(&tokens.at().token_type, lexer::TokenType::Operator(op) if op == "==") {
+            let operator = tokens.at();
+            tokens.pop();
+            let right = self.parse_additive_expr(tokens);
+            left = Node {
+                node_type: NodeType::BinaryExpr(operator.token_type.extract_operator().unwrap().to_string()),
+                value: None,
+                body: vec![left, right]
+            };   
+        }
+        left
     }
 
     fn parse_additive_expr(&mut self, tokens: &mut lexer::TokenStream) -> Node{
@@ -117,6 +133,10 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
             lexer::TokenType::EOL => {
                 let ret = Node { node_type: NodeType::EOL, value: None, body: vec![] };
                 tokens.pop();
+                ret
+            },
+            lexer::TokenType::Boolean(_) => {
+                let ret = Node {node_type: NodeType::Boolean, value: Some(tokens.at()), body: vec![]};
                 ret
             }
             _ => panic!("{:?}", tokens.at().token_type)
