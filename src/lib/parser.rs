@@ -8,7 +8,8 @@ pub enum NodeType {
     Identifier,
     BinaryExpr(String),
     Assignment,
-    Declaration
+    Declaration,
+    EOL
 }
 impl NodeType {
     pub fn extract_binexp_operator(&self) -> Option<&str> {
@@ -110,6 +111,11 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
             },
             lexer::TokenType::StringLiteral(_) => {
                 let ret = Node {node_type: NodeType::StringLiteral, value: Some(tokens.at()), body: vec![]};
+                tokens.pop();
+                ret
+            },
+            lexer::TokenType::EOL => {
+                let ret = Node { node_type: NodeType::EOL, value: None, body: vec![] };
                 tokens.pop();
                 ret
             }

@@ -78,6 +78,9 @@ pub fn eval(node: &parser::Node, env: &mut environment::Environment) -> RuntimeV
                 runtime_val_type: RuntimeValType::StringLiteral(token_value.to_string())
             }
         },
+        parser::NodeType::EOL => {
+            panic!("This is impossible to reach")
+        }
         _ => {
             panic!()
         }
@@ -235,7 +238,11 @@ fn eval_binary_expr(node: &parser::Node, env: &mut environment::Environment) -> 
 pub fn eval_program(program: &parser::Node, env: &mut environment::Environment) -> RuntimeVal{
     let mut last_eval: RuntimeVal = RuntimeVal { runtime_val_type: RuntimeValType::Null };
     for node in &program.body {
-        last_eval = eval(node, env);
+        if matches!(node.node_type, parser::NodeType::EOL){
+
+        } else {
+            last_eval = eval(node, env);
+        }
     }
     last_eval
 }
