@@ -137,6 +137,7 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
             },
             lexer::TokenType::Boolean(_) => {
                 let ret = Node {node_type: NodeType::Boolean, value: Some(tokens.at()), body: vec![]};
+                tokens.pop();
                 ret
             }
             _ => panic!("{:?}", tokens.at().token_type)

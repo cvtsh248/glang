@@ -62,9 +62,9 @@ impl TokenType {
         }
     }
 
-    pub fn extract_bool_value(&self) -> Option<bool> {
+    pub fn extract_bool_value(&self) -> Option<&bool> {
         if let TokenType::Boolean(boolean) = self {
-            Some(true)
+            Some(boolean)
         } else {
             None
         }

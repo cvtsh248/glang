@@ -30,6 +30,14 @@ impl RuntimeValType {
         }
     }
 
+    pub fn extract_bool_value(&self) -> Option<&bool> {
+        if let RuntimeValType::Boolean(boolean) = self {
+            Some(boolean)
+        } else {
+            None
+        }
+    }
+
 }
 
 #[derive(Debug, Clone)]
@@ -83,7 +91,7 @@ pub fn eval(node: &parser::Node, env: &mut environment::Environment) -> RuntimeV
             let token = &node.value.as_ref().unwrap();
             let token_value = token.token_type.extract_bool_value().unwrap();
             RuntimeVal {
-                runtime_val_type: RuntimeValType::Boolean(token_value)
+                runtime_val_type: RuntimeValType::Boolean(*token_value)
             }
         },
         parser::NodeType::EOL => {
@@ -279,7 +287,69 @@ pub fn eval_numeric_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator:
             }
         },
         _ => {
-            panic!()
+            panic!("Invalid operator for numeric type")
+        }
+    }
+}
+
+fn eval_bool_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator: &str) -> RuntimeVal{
+    match operator {
+        "==" => {
+            let left_type = &left.runtime_val_type;
+            let right_type = &right.runtime_val_type;
+
+            if matches!(left_type, right_type){
+                match left_type {
+                    RuntimeValType::Boolean(_) => {
+                        let left_value = left_type.extract_bool_value().unwrap();
+                        let right_value = right_type.extract_bool_value().unwrap();
+                        RuntimeVal {
+                            runtime_val_type: RuntimeValType::Boolean(*left_value==*right_value)
+                        }
+                    },
+                    RuntimeValType::Boolean(_) => {
+                        let left_value = left_type.extract_bool_value().unwrap();
+                        let right_value = right_type.extract_bool_value().unwrap();
+                        RuntimeVal {
+                            runtime_val_type: RuntimeValType::Boolean(*left_value==*right_value)
+                        }
+                    }
+                    _ => panic!()
+                }
+
+            } else {
+                panic!("Mismatched types")
+            }
+        },
+        "!=" => {
+            let left_type = &left.runtime_val_type;
+            let right_type = &right.runtime_val_type;
+
+            if matches!(left_type, right_type){
+                match left_type {
+                    RuntimeValType::Boolean(_) => {
+                        let left_value = left_type.extract_bool_value().unwrap();
+                        let right_value = right_type.extract_bool_value().unwrap();
+                        RuntimeVal {
+                            runtime_val_type: RuntimeValType::Boolean(*left_value != *right_value)
+                        }
+                    },
+                    RuntimeValType::Boolean(_) => {
+                        let left_value = left_type.extract_bool_value().unwrap();
+                        let right_value = right_type.extract_bool_value().unwrap();
+                        RuntimeVal {
+                            runtime_val_type: RuntimeValType::Boolean(*left_value != *right_value)
+                        }
+                    }
+                    _ => panic!()
+                }
+
+            } else {
+                panic!("Mismatched types")
+            }
+        },
+        _ => {
+            panic!("Invalid operator for boolean type")
         }
     }
 }
@@ -292,6 +362,8 @@ fn eval_binary_expr(node: &parser::Node, env: &mut environment::Environment) -> 
         eval_numeric_binary_expr(&left, &right, node.node_type.extract_binexp_operator().unwrap())
     } else if matches!(left.runtime_val_type, RuntimeValType::NumericFloat(_)) && matches!(right.runtime_val_type, RuntimeValType::NumericFloat(_)) {
         eval_numeric_binary_expr(&left, &right, node.node_type.extract_binexp_operator().unwrap())
+    } else if matches!(left.runtime_val_type, RuntimeValType::Boolean(_)) && matches!(right.runtime_val_type, RuntimeValType::Boolean(_)) {
+        eval_bool_binary_expr(&left, &right, node.node_type.extract_binexp_operator().unwrap())
     } else {
         panic!()
     }
