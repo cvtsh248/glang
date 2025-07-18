@@ -10,6 +10,7 @@ pub enum NodeType {
     BinaryExpr(String),
     Assignment,
     Declaration,
+    Scope,
     EOL
 }
 impl NodeType {
@@ -83,6 +84,23 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
         }
         left
     }
+    
+    fn parse_multiplicative_expr(& mut self, tokens: &mut lexer::TokenStream) -> Node{
+        let mut left: Node = self.parse_primary_expr(tokens);
+        // tokens.pop();
+        while matches!(&tokens.at().token_type, lexer::TokenType::Operator(op) if op == "*" || op == "/"){
+            let operator = tokens.at();
+            tokens.pop();
+            let right = self.parse_primary_expr(tokens);
+            left = Node {
+                node_type: NodeType::BinaryExpr(operator.token_type.extract_operator().unwrap().to_string()),
+                value: None,
+                body: vec![left, right]
+            };
+        }
+        left
+
+    }
 
     fn parse_primary_expr(&mut self, tokens: &mut lexer::TokenStream) -> Node{
         match &tokens.at().token_type{
@@ -100,13 +118,26 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
                 tokens.pop();
                 let parsed: Node = self.parse_equality_expr(tokens);
                 // tokens.pop();
-                println!("{:?}", parsed);
+                // println!("{:?}", parsed);
 
                 if matches!(tokens.at().token_type, lexer::TokenType::CloseBracket){
                     tokens.pop();
                     parsed
                 } else {
                     panic!("Unexpected token within brackets - expected closing bracket, got: {:?}",tokens.at().token_type)
+                }
+            },
+            lexer::TokenType::OpenCurlyBracket => {
+                tokens.pop();
+                let mut body: Vec<Node> = vec![];
+                while !matches!(tokens.at().token_type, lexer::TokenType::CloseCurlyBracket){
+                    body.push(self.parse_stmt(tokens));
+                }
+                tokens.pop();
+                Node {
+                    node_type: NodeType::Scope,
+                    value: None,
+                    body: body,
                 }
             },
             lexer::TokenType::Identifier(_) => {
@@ -143,23 +174,6 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
             _ => panic!("{:?}", tokens.at().token_type)
         }
         
-    }
-    
-    fn parse_multiplicative_expr(& mut self, tokens: &mut lexer::TokenStream) -> Node{
-        let mut left: Node = self.parse_primary_expr(tokens);
-        // tokens.pop();
-        while matches!(&tokens.at().token_type, lexer::TokenType::Operator(op) if op == "*" || op == "/"){
-            let operator = tokens.at();
-            tokens.pop();
-            let right = self.parse_primary_expr(tokens);
-            left = Node {
-                node_type: NodeType::BinaryExpr(operator.token_type.extract_operator().unwrap().to_string()),
-                value: None,
-                body: vec![left, right]
-            };
-        }
-        left
-
     }
 
     fn generate_ast(&mut self, tokens: &mut lexer::TokenStream){

@@ -1,4 +1,7 @@
 use super::eval;
+use std::sync::Mutex;
+
+pub static ENVIRONMENT_ARRAY: Mutex<Vec<&Environment>> = Mutex::new(vec![]);
 
 #[derive(Debug, Clone)]
 pub struct Variable {
@@ -21,6 +24,8 @@ impl Environment {
             }
         }
 
+        println!("{:?}", self);
+
         if !self.parent.is_none() {
             return self.parent.as_deref_mut().unwrap().resolve_env(name)
         } 
@@ -35,8 +40,10 @@ impl Environment {
                 panic!("Variable already defined: {:?}", variable.name)
             } else {
                 self.variables.push(Variable { name: identifier.to_string(), value: value.clone() });
+                return value.clone()
             }
         }
+        self.variables.push(Variable { name: identifier.to_string(), value: value.clone() });
         value.clone()
     }
 

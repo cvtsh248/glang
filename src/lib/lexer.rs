@@ -8,8 +8,11 @@ pub enum TokenType {
     Operator(String),
     OpenBracket,
     CloseBracket,
+    OpenCurlyBracket,
+    CloseCurlyBracket,
     Let,
     Punctuation(String),
+    If,
     EOL,
     EOF
 }
@@ -19,6 +22,7 @@ impl TokenType {
             "let" => Some(TokenType::Let),
             "true" => Some(TokenType::Boolean(true)),
             "false" => Some(TokenType::Boolean(false)),
+            "if" => Some(TokenType::If),
             _=>None
         }
         
@@ -147,6 +151,14 @@ pub fn tokenise(source: String) -> TokenStream {
             tokens.push(Token {
                 token_type: TokenType::CloseBracket
             });
+        } else if source_datastream.at() == '{'{
+            tokens.push(Token {
+                token_type: TokenType::OpenCurlyBracket
+            }); 
+        } else if source_datastream.at() == '}'{
+            tokens.push(Token {
+                token_type: TokenType::CloseCurlyBracket
+            });  
         } else if source_datastream.at() == '+'{
             if source_datastream.characters.len() - source_datastream.current_pos > 1 && source_datastream.characters[source_datastream.current_pos+1] == '='{
                 tokens.push(Token {

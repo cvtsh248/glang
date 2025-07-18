@@ -4,11 +4,16 @@ use std::io::{self, Write};
 mod lib;
 fn main() {
     let source: String = 
-    "true!=false" .to_string();
+    "
+    let x = 1;
+    {let z = 4;
+    x = z+2;}
+    x;
+    " .to_string();
     // let tokens = lib::lexer::tokenise(source);
     let ast = lib::parser::generate_ast(source);
     println!("{:?}", ast);
-    let mut environment = lib::environment::Environment {parent: None, variables: vec![lib::environment::Variable{ name: "x".to_string(), value: lib::eval::RuntimeVal{runtime_val_type:RuntimeValType::NumericInteger(2)} }]};
+    let mut environment = lib::environment::Environment {parent: None, variables: vec![]}; // lib::environment::Variable{ name: "x".to_string(), value: lib::eval::RuntimeVal{runtime_val_type:RuntimeValType::NumericInteger(2)} }
     let evaluate = lib::eval::eval_program(&ast, &mut environment);
     println!("{:?}", evaluate);
 

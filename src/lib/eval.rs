@@ -96,6 +96,9 @@ pub fn eval(node: &parser::Node, env: &mut environment::Environment) -> RuntimeV
         },
         parser::NodeType::EOL => {
             panic!("This is impossible to reach")
+        },
+        parser::NodeType::Scope => {
+            eval(node, env)
         }
         _ => {
             panic!()
@@ -306,13 +309,6 @@ fn eval_bool_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator: &str) 
                         RuntimeVal {
                             runtime_val_type: RuntimeValType::Boolean(*left_value==*right_value)
                         }
-                    },
-                    RuntimeValType::Boolean(_) => {
-                        let left_value = left_type.extract_bool_value().unwrap();
-                        let right_value = right_type.extract_bool_value().unwrap();
-                        RuntimeVal {
-                            runtime_val_type: RuntimeValType::Boolean(*left_value==*right_value)
-                        }
                     }
                     _ => panic!()
                 }
@@ -327,13 +323,6 @@ fn eval_bool_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator: &str) 
 
             if matches!(left_type, right_type){
                 match left_type {
-                    RuntimeValType::Boolean(_) => {
-                        let left_value = left_type.extract_bool_value().unwrap();
-                        let right_value = right_type.extract_bool_value().unwrap();
-                        RuntimeVal {
-                            runtime_val_type: RuntimeValType::Boolean(*left_value != *right_value)
-                        }
-                    },
                     RuntimeValType::Boolean(_) => {
                         let left_value = left_type.extract_bool_value().unwrap();
                         let right_value = right_type.extract_bool_value().unwrap();
@@ -373,9 +362,15 @@ pub fn eval_program(program: &parser::Node, env: &mut environment::Environment) 
     let mut last_eval: RuntimeVal = RuntimeVal { runtime_val_type: RuntimeValType::Null };
     for node in &program.body {
         if matches!(node.node_type, parser::NodeType::EOL){
-
+            continue
+        } else if matches!(node.node_type, parser::NodeType::Scope){
+            let mut new_env = environment::Environment {parent: Some(Box::new(env.clone())), variables: vec![]}; 
+            
+            eval_program(node,&mut new_env);
+            println!("{:?}", new_env);
+            
         } else {
-            last_eval = eval(node, env);
+            last_eval = eval(&node, env);
         }
     }
     last_eval
