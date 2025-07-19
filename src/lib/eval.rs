@@ -1,8 +1,11 @@
+use std::cell::Ref;
 use std::env;
 
 use super::lexer;
 use super::parser;
 use super::environment;
+use std::rc::Rc;
+use std::cell::RefCell;
 
 #[derive(Debug, Clone)]
 pub enum RuntimeValType {
@@ -45,7 +48,7 @@ pub struct RuntimeVal {
     pub runtime_val_type : RuntimeValType,
 }
 
-pub fn eval(node: &parser::Node, env: &mut environment::Environment) -> RuntimeVal {
+pub fn eval(node: &parser::Node, env: Rc<RefCell<environment::Environment>>) -> RuntimeVal {
     match node.node_type {
         parser::NodeType::NumericLiteral => {
             let token = &node.value.as_ref().unwrap();
@@ -106,21 +109,21 @@ pub fn eval(node: &parser::Node, env: &mut environment::Environment) -> RuntimeV
     }
 }
 
-pub fn eval_identifier(identifier: &parser::Node, env: &mut environment::Environment) -> RuntimeVal{
+pub fn eval_identifier(identifier: &parser::Node, env: Rc<RefCell<environment::Environment>>) -> RuntimeVal{
     let identifier_string = identifier.value.as_ref().unwrap().token_type.extract_str_value().unwrap().to_string();
-    env.lookup_variable(&identifier_string)
+    environment::lookup_variable(env, &identifier_string)
 }
 
-pub fn eval_assignment(node: &parser::Node, env: &mut environment::Environment) -> RuntimeVal{
+pub fn eval_assignment(node: &parser::Node, env: Rc<RefCell<environment::Environment>>) -> RuntimeVal{
     let identifier_string = node.value.as_ref().unwrap().token_type.extract_str_value().unwrap().to_string();
-    let eval_rhs = eval(&node.body[0], env);
-    env.assign_variable(&identifier_string, &eval_rhs)
+    let eval_rhs = eval(&node.body[0], env.clone());
+    environment::assign_variable(env, &identifier_string, &eval_rhs)
 }
 
-pub fn eval_declaration(node: &parser::Node, env: &mut environment::Environment) -> RuntimeVal{
+pub fn eval_declaration(node: &parser::Node, env: Rc<RefCell<environment::Environment>>) -> RuntimeVal{
     let identifier_string = node.value.as_ref().unwrap().token_type.extract_str_value().unwrap().to_string();
-    let eval_rhs = eval(&node.body[0], env);
-    env.declare_variable(&identifier_string, &eval_rhs)
+    let eval_rhs = eval(&node.body[0], env.clone());
+    environment::declare_variable(env, &identifier_string, &eval_rhs)
 }
 
 
@@ -343,9 +346,9 @@ fn eval_bool_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator: &str) 
     }
 }
 
-fn eval_binary_expr(node: &parser::Node, env: &mut environment::Environment) -> RuntimeVal {
-    let left = eval(&node.body[0], env);
-    let right = eval(&node.body[1], env);
+fn eval_binary_expr(node: &parser::Node, env: Rc<RefCell<environment::Environment>>) -> RuntimeVal {
+    let left = eval(&node.body[0], env.clone());
+    let right = eval(&node.body[1], env.clone());
 
     if matches!(left.runtime_val_type, RuntimeValType::NumericInteger(_)) && matches!(right.runtime_val_type, RuntimeValType::NumericInteger(_)){
         eval_numeric_binary_expr(&left, &right, node.node_type.extract_binexp_operator().unwrap())
@@ -358,19 +361,19 @@ fn eval_binary_expr(node: &parser::Node, env: &mut environment::Environment) -> 
     }
 }
 
-pub fn eval_program(program: &parser::Node, env: &mut environment::Environment) -> RuntimeVal{
+pub fn eval_program(program: &parser::Node, env: Rc<RefCell<environment::Environment>>) -> RuntimeVal{
     let mut last_eval: RuntimeVal = RuntimeVal { runtime_val_type: RuntimeValType::Null };
     for node in &program.body {
         if matches!(node.node_type, parser::NodeType::EOL){
             continue
         } else if matches!(node.node_type, parser::NodeType::Scope){
-            let mut new_env = environment::Environment {parent: Some(Box::new(env.clone())), variables: vec![]}; 
+            let mut new_env = Rc::new(RefCell::new(environment::Environment {parent: Some(env.clone()), variables: vec![]})); 
             
-            eval_program(node,&mut new_env);
-            println!("{:?}", new_env);
+            eval_program(node,new_env);
+            // println!("{:?}", new_env);
             
         } else {
-            last_eval = eval(&node, env);
+            last_eval = eval(&node, env.clone());
         }
     }
     last_eval
