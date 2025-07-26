@@ -51,12 +51,12 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
     }
 
     fn parse_expr(&mut self, tokens: &mut lexer::TokenStream) -> Node{
-        self.parse_equality_expr(tokens)
+        self.parse_comparative_expr(tokens)
     }
 
-    fn parse_equality_expr(&mut self, tokens: &mut lexer::TokenStream) -> Node{
+    fn parse_comparative_expr(&mut self, tokens: &mut lexer::TokenStream) -> Node{
         let mut left: Node = self.parse_additive_expr(tokens);
-        while matches!(&tokens.at().token_type, lexer::TokenType::Operator(op) if op == "==" || op == "!=") {
+        while matches!(&tokens.at().token_type, lexer::TokenType::Operator(op) if op == "==" || op == "!=" || op == ">" || op == "<" || op == ">=" || op == "<=") {
             let operator = tokens.at();
             tokens.pop();
             let right = self.parse_additive_expr(tokens);
@@ -116,7 +116,7 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
             },
             lexer::TokenType::OpenBracket => {
                 tokens.pop();
-                let parsed: Node = self.parse_equality_expr(tokens);
+                let parsed: Node = self.parse_comparative_expr(tokens);
                 // tokens.pop();
                 // println!("{:?}", parsed);
 
@@ -156,6 +156,12 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
                 }
                 ret
             },
+            // lexer::TokenType::Operator(op) if op == "!" => {
+            //     let operator = "!".to_string();
+            //     tokens.pop();
+            //     let right = self.parse_primary_expr(tokens);
+            //     ri
+            // },
             lexer::TokenType::StringLiteral(_) => {
                 let ret = Node {node_type: NodeType::StringLiteral, value: Some(tokens.at()), body: vec![]};
                 tokens.pop();
