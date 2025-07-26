@@ -495,6 +495,46 @@ fn eval_bool_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator: &str) 
                 panic!("Mismatched types")
             }
         },
+        "&&" => {
+            let left_type = &left.runtime_val_type;
+            let right_type = &right.runtime_val_type;
+
+            if matches!(left_type, right_type){
+                match left_type {
+                    RuntimeValType::Boolean(_) => {
+                        let left_value = left_type.extract_bool_value().unwrap();
+                        let right_value = right_type.extract_bool_value().unwrap();
+                        RuntimeVal {
+                            runtime_val_type: RuntimeValType::Boolean(*left_value && *right_value)
+                        }
+                    }
+                    _ => panic!()
+                }
+
+            } else {
+                panic!("Mismatched types")
+            }
+        },
+        "||" => {
+            let left_type = &left.runtime_val_type;
+            let right_type = &right.runtime_val_type;
+
+            if matches!(left_type, right_type){
+                match left_type {
+                    RuntimeValType::Boolean(_) => {
+                        let left_value = left_type.extract_bool_value().unwrap();
+                        let right_value = right_type.extract_bool_value().unwrap();
+                        RuntimeVal {
+                            runtime_val_type: RuntimeValType::Boolean(*left_value || *right_value)
+                        }
+                    }
+                    _ => panic!()
+                }
+
+            } else {
+                panic!("Mismatched types")
+            }
+        },
         _ => {
             panic!("Invalid operator for boolean type")
         }
