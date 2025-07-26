@@ -8,6 +8,7 @@ pub enum NodeType {
     Boolean,
     Identifier,
     BinaryExpr(String),
+    UnaryExpr(String),
     Assignment,
     Declaration,
     Scope,
@@ -16,6 +17,13 @@ pub enum NodeType {
 impl NodeType {
     pub fn extract_binexp_operator(&self) -> Option<&str> {
         if let NodeType::BinaryExpr(op) = self {
+            Some(op)
+        } else {
+            None
+        }
+    }
+    pub fn extract_unexp_operator(&self) -> Option<&str> {
+        if let NodeType::UnaryExpr(op) = self {
             Some(op)
         } else {
             None
@@ -156,12 +164,25 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
                 }
                 ret
             },
-            // lexer::TokenType::Operator(op) if op == "!" => {
-            //     let operator = "!".to_string();
-            //     tokens.pop();
-            //     let right = self.parse_primary_expr(tokens);
-            //     ri
-            // },
+            lexer::TokenType::Operator(op) if op == "!" => {
+                tokens.pop();
+                if matches!(tokens.at().token_type, lexer::TokenType::OpenBracket){
+                    let mut body: Vec<Node> = vec![];
+                        while !matches!(tokens.at().token_type, lexer::TokenType::EOF) && !matches!(tokens.at().token_type, lexer::TokenType::EOL) && !matches!(tokens.at().token_type, lexer::TokenType::CloseBracket) {
+                            tokens.pop();
+                            body.push(self.parse_expr(tokens));
+                        }
+                    tokens.pop();
+                    let ret = Node {node_type: NodeType::UnaryExpr("!".to_string()), value: None, body: body};
+                    return ret
+                } else {
+                    let right = self.parse_expr(tokens);
+                    let body = vec![right];
+                    let ret = Node {node_type: NodeType::UnaryExpr("!".to_string()), value: None, body: body};
+                    return ret
+                }
+                // panic!();
+            },
             lexer::TokenType::StringLiteral(_) => {
                 let ret = Node {node_type: NodeType::StringLiteral, value: Some(tokens.at()), body: vec![]};
                 tokens.pop();

@@ -73,6 +73,9 @@ pub fn eval(node: &parser::Node, env: Rc<RefCell<environment::Environment>>) -> 
         parser::NodeType::BinaryExpr(_) => {
             eval_binary_expr(node, env)
         },
+        parser::NodeType::UnaryExpr(_) => {
+            eval_unary_expr(node, env)
+        },
         parser::NodeType::Identifier => {
             eval_identifier(node, env)
         },
@@ -126,6 +129,50 @@ pub fn eval_declaration(node: &parser::Node, env: Rc<RefCell<environment::Enviro
     environment::declare_variable(env, &identifier_string, &eval_rhs)
 }
 
+fn eval_numeric_unary_expr(right: &RuntimeVal, operator: &str) -> RuntimeVal {
+    match operator {
+        "!" => {
+            let right_type = &right.runtime_val_type;
+            if matches!(right_type, RuntimeValType::NumericInteger(_)){
+                let right_value = right_type.extract_int_value().unwrap();
+                return RuntimeVal {
+                    runtime_val_type: RuntimeValType::NumericInteger(!*right_value)
+                }
+            }
+            panic!("Incorrect type for ! operator")
+
+        },
+        _ => {
+            panic!()
+        }
+    }
+}
+
+fn eval_boolean_unary_expr(right: &RuntimeVal, operator: &str) -> RuntimeVal {
+    match operator {
+        "!" => {
+            let right_value = right.runtime_val_type.extract_bool_value().unwrap();
+            RuntimeVal {
+                runtime_val_type: RuntimeValType::Boolean(!*right_value)
+            }
+        },
+        _ => {
+            panic!()
+        }
+    }
+}
+
+fn eval_unary_expr(node: &parser::Node, env: Rc<RefCell<environment::Environment>>) -> RuntimeVal {
+    let right = eval(&node.body[0], env.clone());
+    if matches!(right.runtime_val_type, RuntimeValType::NumericInteger(_)){
+        eval_numeric_unary_expr(&right, node.node_type.extract_unexp_operator().unwrap())
+    } else if matches!(right.runtime_val_type, RuntimeValType::Boolean(_)) {
+        eval_boolean_unary_expr(&right, node.node_type.extract_unexp_operator().unwrap())
+    } else {
+        panic!("Incorrect type")
+    }
+    // panic!("{:?}",node.node_type.extract_unexp_operator().unwrap())
+}
 
 pub fn eval_numeric_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator: &str) -> RuntimeVal{
     match operator {
