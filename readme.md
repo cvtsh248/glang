@@ -45,6 +45,9 @@ This is an interpreted language written in Rust that I've been writing for fun. 
 ### Example programs
 Examples can be found in `demo_scripts`
 
+### Running scripts
+`cargo run path_to_file.glang`
+
 ### Todo
 * Break loops
 * Else statements for control flow
