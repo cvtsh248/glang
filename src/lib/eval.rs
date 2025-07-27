@@ -558,18 +558,49 @@ fn eval_binary_expr(node: &parser::Node, env: Rc<RefCell<environment::Environmen
 
 pub fn eval_program(program: &parser::Node, env: Rc<RefCell<environment::Environment>>) -> RuntimeVal{
     let mut last_eval: RuntimeVal = RuntimeVal { runtime_val_type: RuntimeValType::Null };
-    for node in &program.body {
-        if matches!(node.node_type, parser::NodeType::EOL){
-            continue
+    let mut loop_flag = false;
+    let mut loop_condition: Option<&parser::Node> = None;
+    let mut loop_node: Option<&parser::Node> = None;
+    let mut program_counter: usize = 0;
+    while program_counter < program.body.len() {
+        let node = &program.body[program_counter];
+        
+        if matches!(node.node_type, parser::NodeType::Loop) || loop_flag == true {
+
+            if loop_flag == false {
+                loop_node = Some(&node);
+                loop_condition = Some(&node.body[0]);
+            }
+
+            let condition_eval = eval(loop_condition.unwrap(),env.clone());
+
+            let mut new_env = Rc::new(RefCell::new(environment::Environment {parent: Some(env.clone()), variables: vec![]})); 
+            
+            // println!("{:?}", loop_flag);
+
+            eval_program(&loop_node.unwrap(),new_env);
+
+            loop_flag = true;
+            if *condition_eval.runtime_val_type.extract_bool_value().unwrap() == false {
+                program_counter += 1;
+                loop_flag = false;
+            }
+
         } else if matches!(node.node_type, parser::NodeType::Scope){
             let mut new_env = Rc::new(RefCell::new(environment::Environment {parent: Some(env.clone()), variables: vec![]})); 
             
             eval_program(node,new_env);
+            program_counter += 1;
             // println!("{:?}", new_env);
             
+        } else if matches!(node.node_type, parser::NodeType::EOL){
+            program_counter += 1;
+            continue
         } else {
             last_eval = eval(&node, env.clone());
+            program_counter += 1;
         }
     }
+    
     last_eval
 }
