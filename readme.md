@@ -49,6 +49,7 @@ Examples can be found in `demo_scripts`
 `cargo run path_to_file.glang`
 
 ### Todo
+Once I complete the following I'll probably no longer touch the project:
 * Break loops
 * Else statements for control flow
 * Arrays
