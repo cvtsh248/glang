@@ -1,5 +1,8 @@
 let i = 1;
-loop (i < 3) {
+loop (i < 6) {
+    if (i%2 == 0){
+        print("monkey");
+    }
     i = i + 1;
 }
 print(i);

@@ -5,7 +5,7 @@ use std::fs;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    println!("{:?}",args);
+    // println!("{:?}",args);
 
     let mut source: Option<String> = None;
 
