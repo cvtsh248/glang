@@ -98,7 +98,7 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
     fn parse_multiplicative_expr(& mut self, tokens: &mut lexer::TokenStream) -> Node{
         let mut left: Node = self.parse_primary_expr(tokens);
         // tokens.pop();
-        while matches!(&tokens.at().token_type, lexer::TokenType::Operator(op) if op == "*" || op == "/"){
+        while matches!(&tokens.at().token_type, lexer::TokenType::Operator(op) if op == "*" || op == "/" || op == "%"){
             let operator = tokens.at();
             tokens.pop();
             let right = self.parse_primary_expr(tokens);

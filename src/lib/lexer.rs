@@ -161,6 +161,10 @@ pub fn tokenise(source: String) -> TokenStream {
             tokens.push(Token {
                 token_type: TokenType::CloseCurlyBracket
             });  
+        } else if source_datastream.at() == '%'{
+            tokens.push(Token {
+                token_type: TokenType::Operator("%".to_string())
+            }); 
         } else if source_datastream.at() == '+'{
             if source_datastream.characters.len() - source_datastream.current_pos > 1 && source_datastream.characters[source_datastream.current_pos+1] == '='{
                 tokens.push(Token {

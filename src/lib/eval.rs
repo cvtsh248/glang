@@ -285,6 +285,33 @@ pub fn eval_numeric_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator:
                 panic!("Mismatched types")
             }
         },
+        "%" => {
+            let left_type = &left.runtime_val_type;
+            let right_type = &right.runtime_val_type;
+
+            if matches!(left_type, right_type){
+                match left_type {
+                    RuntimeValType::NumericInteger(_) => {
+                        let left_value = left_type.extract_int_value().unwrap();
+                        let right_value = right_type.extract_int_value().unwrap();
+                        RuntimeVal {
+                            runtime_val_type: RuntimeValType::NumericInteger(*left_value % *right_value)
+                        }
+                    },
+                    RuntimeValType::NumericFloat(_) => {
+                        let left_value = left_type.extract_float_value().unwrap();
+                        let right_value = right_type.extract_float_value().unwrap();
+                        RuntimeVal {
+                            runtime_val_type: RuntimeValType::NumericFloat(*left_value % *right_value)
+                        }
+                    }
+                    _ => panic!()
+                }
+
+            } else {
+                panic!("Mismatched types")
+            }
+        },
         "==" => {
             let left_type = &left.runtime_val_type;
             let right_type = &right.runtime_val_type;
