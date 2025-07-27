@@ -1,6 +1,0 @@
-let number = 1;
-let result = false;
-
-if number <= 1 {
-    result = false;
-}
