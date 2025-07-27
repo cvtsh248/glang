@@ -586,6 +586,18 @@ pub fn eval_program(program: &parser::Node, env: Rc<RefCell<environment::Environ
                 loop_flag = false;
             }
 
+        } else if matches!(node.node_type, parser::NodeType::If) {
+            let if_condition = &node.body[0];
+            let if_condition_eval = eval(if_condition, env.clone());
+
+            if *if_condition_eval.runtime_val_type.extract_bool_value().unwrap() == true {
+                let mut new_env = Rc::new(RefCell::new(environment::Environment {parent: Some(env.clone()), variables: vec![]})); 
+                eval_program(node,new_env);
+                program_counter += 1;
+            } else {
+                program_counter += 1;
+            }
+
         } else if matches!(node.node_type, parser::NodeType::Scope){
             let mut new_env = Rc::new(RefCell::new(environment::Environment {parent: Some(env.clone()), variables: vec![]})); 
             

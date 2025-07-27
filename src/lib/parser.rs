@@ -13,6 +13,7 @@ pub enum NodeType {
     Declaration,
     Scope,
     Loop,
+    If,
     EOL
 }
 impl NodeType {
@@ -198,6 +199,24 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
                 let ret = Node {node_type: NodeType::Boolean, value: Some(tokens.at()), body: vec![]};
                 tokens.pop();
                 ret
+            },
+            lexer::TokenType::If => {
+                tokens.pop();
+                if matches!(tokens.at().token_type, lexer::TokenType::OpenBracket){
+                    let mut body: Vec<Node> = vec![]; // Zeroeth item in body is condition, next is scope
+                        while !matches!(tokens.at().token_type, lexer::TokenType::EOF) && !matches!(tokens.at().token_type, lexer::TokenType::EOL) && !matches!(tokens.at().token_type, lexer::TokenType::CloseBracket) {
+                            tokens.pop();
+                            body.push(self.parse_expr(tokens));
+                        }
+                    tokens.pop();
+                    if matches!(tokens.at().token_type, lexer::TokenType::OpenCurlyBracket){
+                        body.push(self.parse_expr(tokens));
+                        let ret = Node {node_type: NodeType::If, value: None, body: body};
+                        return ret
+                    } 
+                    panic!()
+                }
+                panic!()
             },
             lexer::TokenType::Loop => {
                 tokens.pop();
