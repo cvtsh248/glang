@@ -14,6 +14,7 @@ pub enum NodeType {
     Scope,
     Loop,
     If,
+    Print,
     EOL
 }
 impl NodeType {
@@ -233,6 +234,20 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
                         return ret
                     } 
                     panic!()
+                }
+                panic!()
+            },
+            lexer::TokenType::Print => {
+                tokens.pop();
+                if matches!(tokens.at().token_type, lexer::TokenType::OpenBracket){
+                    let mut body: Vec<Node> = vec![]; // Item is what is to be printed
+                        while !matches!(tokens.at().token_type, lexer::TokenType::EOF) && !matches!(tokens.at().token_type, lexer::TokenType::EOL) && !matches!(tokens.at().token_type, lexer::TokenType::CloseBracket) {
+                            tokens.pop();
+                            body.push(self.parse_expr(tokens));
+                        }
+                    tokens.pop();
+                    let ret = Node {node_type: NodeType::Print, value: None, body: body};
+                    return ret
                 }
                 panic!()
             }

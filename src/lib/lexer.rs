@@ -14,6 +14,7 @@ pub enum TokenType {
     Punctuation(String),
     If,
     Loop,
+    Print,
     EOL,
     EOF
 }
@@ -25,6 +26,7 @@ impl TokenType {
             "false" => Some(TokenType::Boolean(false)),
             "if" => Some(TokenType::If),
             "loop" => Some(TokenType::Loop),
+            "print" => Some(TokenType::Print),
             _=>None
         }
         

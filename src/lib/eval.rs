@@ -41,6 +41,14 @@ impl RuntimeValType {
         }
     }
 
+    pub fn extract_string_value(&self) -> Option<&String> {
+        if let RuntimeValType::StringLiteral(string_) = self {
+            Some(string_)
+        } else {
+            None
+        }
+    }
+
 }
 
 #[derive(Debug, Clone)]
@@ -632,6 +640,26 @@ pub fn eval_program(program: &parser::Node, env: Rc<RefCell<environment::Environ
             program_counter += 1;
             // println!("{:?}", new_env);
             
+        } else if matches!(node.node_type, parser::NodeType::Print) {
+            let val = eval(&node.body[0], env.clone());
+            // println!("{:?}",&node.body[0]);
+            match val.runtime_val_type {
+                RuntimeValType::NumericInteger(_) => {
+                    println!("{:?}",val.runtime_val_type.extract_int_value().unwrap());
+                },
+                RuntimeValType::NumericFloat(_) => {
+                    println!("{:?}",val.runtime_val_type.extract_float_value().unwrap());
+                },
+                RuntimeValType::Boolean(_) => {
+                    println!("{:?}",val.runtime_val_type.extract_bool_value().unwrap());
+                },
+                RuntimeValType::StringLiteral(_) => {
+                    println!("{:?}",val.runtime_val_type.extract_string_value().unwrap());
+                },
+                _=> panic!("Invalid type to print")
+            }
+            program_counter += 1;
+            // println!(val.va)
         } else if matches!(node.node_type, parser::NodeType::EOL){
             program_counter += 1;
             continue

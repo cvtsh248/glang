@@ -15,5 +15,5 @@ fn main() {
     }
     
     let out = lib::run::run_script(source.unwrap());
-    println!("{:?}", out);
+    // println!("{:?}", out);
 }
