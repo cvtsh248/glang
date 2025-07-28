@@ -228,6 +228,11 @@ pub fn tokenise(source: String) -> TokenStream {
                 });
                 source_datastream.pop()
                 // source_split.remove(1);
+            } else if source_datastream.characters.len() - source_datastream.current_pos > 1 && source_datastream.characters[source_datastream.current_pos+1] == '*'{ 
+                tokens.push(Token {
+                    token_type: TokenType::Operator("**".to_string())
+                });
+                source_datastream.pop()
             } else {
                 tokens.push(Token {
                     token_type: TokenType::Operator("*".to_string())

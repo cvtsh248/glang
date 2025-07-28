@@ -100,9 +100,26 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
     }
     
     fn parse_multiplicative_expr(& mut self, tokens: &mut lexer::TokenStream) -> Node{
-        let mut left: Node = self.parse_primary_expr(tokens);
+        let mut left: Node = self.parse_power_expr(tokens);
         // tokens.pop();
         while matches!(&tokens.at().token_type, lexer::TokenType::Operator(op) if op == "*" || op == "/" || op == "%"){
+            let operator = tokens.at();
+            tokens.pop();
+            let right = self.parse_power_expr(tokens);
+            left = Node {
+                node_type: NodeType::BinaryExpr(operator.token_type.extract_operator().unwrap().to_string()),
+                value: None,
+                body: vec![left, right]
+            };
+        }
+        left
+
+    }
+
+    fn parse_power_expr(& mut self, tokens: &mut lexer::TokenStream) -> Node{
+        let mut left: Node = self.parse_primary_expr(tokens);
+        // tokens.pop();
+        while matches!(&tokens.at().token_type, lexer::TokenType::Operator(op) if op == "**"){
             let operator = tokens.at();
             tokens.pop();
             let right = self.parse_primary_expr(tokens);
