@@ -14,6 +14,7 @@ pub enum RuntimeValType {
     NumericFloat(f64),
     StringLiteral(String),
     Boolean(bool),
+    Break,
     Runtime
 }
 impl RuntimeValType {
@@ -58,6 +59,11 @@ pub struct RuntimeVal {
 
 pub fn eval(node: &parser::Node, env: Rc<RefCell<environment::Environment>>) -> RuntimeVal {
     match node.node_type {
+        parser::NodeType::Break => {
+            RuntimeVal {
+                runtime_val_type: RuntimeValType::Break
+            }
+        },
         parser::NodeType::NumericLiteral => {
             let token = &node.value.as_ref().unwrap();
 
@@ -600,11 +606,10 @@ pub fn eval_program(program: &parser::Node, env: Rc<RefCell<environment::Environ
     let mut program_counter: usize = 0;
     while program_counter < program.body.len() {
         let node = &program.body[program_counter];
-        
         if matches!(node.node_type, parser::NodeType::Loop) || loop_flag == true {
 
             if loop_flag == false {
-                loop_node = Some(&node);
+                loop_node = Some(&node.body[1]);
                 loop_condition = Some(&node.body[0]);
             }
 
@@ -613,11 +618,16 @@ pub fn eval_program(program: &parser::Node, env: Rc<RefCell<environment::Environ
             let mut new_env = Rc::new(RefCell::new(environment::Environment {parent: Some(env.clone()), variables: vec![]})); 
             
             // println!("{:?}", loop_flag);
-
-            eval_program(&loop_node.unwrap(),new_env);
+            let prg = eval_program(&loop_node.unwrap(),new_env);
+            last_eval = prg.clone();
+            // println!("{:?}",prg);
 
             loop_flag = true;
-            if *condition_eval.runtime_val_type.extract_bool_value().unwrap() == false {
+            if matches!(prg.runtime_val_type, RuntimeValType::Break) {
+                program_counter += 1;
+                loop_flag = false;
+            }
+            else if *condition_eval.runtime_val_type.extract_bool_value().unwrap() == false{
                 program_counter += 1;
                 loop_flag = false;
             }
@@ -628,7 +638,10 @@ pub fn eval_program(program: &parser::Node, env: Rc<RefCell<environment::Environ
 
             if *if_condition_eval.runtime_val_type.extract_bool_value().unwrap() == true {
                 let mut new_env = Rc::new(RefCell::new(environment::Environment {parent: Some(env.clone()), variables: vec![]})); 
-                eval_program(node,new_env);
+                let result = eval_program(node, new_env);
+                if matches!(result.runtime_val_type, RuntimeValType::Break) {
+                    return result; // Propagate Break immediately
+                }
                 program_counter += 1;
             } else {
                 if_check_fail_flag = true;
@@ -641,7 +654,10 @@ pub fn eval_program(program: &parser::Node, env: Rc<RefCell<environment::Environ
 
             if *if_condition_eval.runtime_val_type.extract_bool_value().unwrap() == true && if_check_fail_flag == true {
                 let mut new_env = Rc::new(RefCell::new(environment::Environment {parent: Some(env.clone()), variables: vec![]})); 
-                eval_program(node,new_env);
+                let result = eval_program(node, new_env);
+                if matches!(result.runtime_val_type, RuntimeValType::Break) {
+                    return result; // Propagate Break immediately
+                }
                 if_check_fail_flag = false;
                 program_counter += 1;
             } else {
@@ -652,7 +668,10 @@ pub fn eval_program(program: &parser::Node, env: Rc<RefCell<environment::Environ
         } else if matches!(node.node_type, parser::NodeType::Else){
             if if_check_fail_flag == true {
                 let mut new_env = Rc::new(RefCell::new(environment::Environment {parent: Some(env.clone()), variables: vec![]})); 
-                eval_program(node,new_env);
+                let result = eval_program(node, new_env);
+                if matches!(result.runtime_val_type, RuntimeValType::Break) {
+                    return result; // Propagate Break immediately
+                }
                 program_counter += 1;
                 if_check_fail_flag = false;
             } else {
@@ -661,7 +680,10 @@ pub fn eval_program(program: &parser::Node, env: Rc<RefCell<environment::Environ
         } else if matches!(node.node_type, parser::NodeType::Scope){
             let mut new_env = Rc::new(RefCell::new(environment::Environment {parent: Some(env.clone()), variables: vec![]})); 
             
-            eval_program(node,new_env);
+            let result = eval_program(node, new_env);
+            if matches!(result.runtime_val_type, RuntimeValType::Break) {
+                return result; // Propagate Break immediately
+            }
             program_counter += 1;
             // println!("{:?}", new_env);
             
@@ -690,7 +712,11 @@ pub fn eval_program(program: &parser::Node, env: Rc<RefCell<environment::Environ
             continue
         } else {
             last_eval = eval(&node, env.clone());
-            program_counter += 1;
+            if matches!(last_eval.runtime_val_type, RuntimeValType::Break){
+                return last_eval;
+            } else {
+                program_counter += 1;
+            }
         }
     }
     

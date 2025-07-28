@@ -1,11 +1,9 @@
 let i = 1;
-loop (i < 9) {
+loop (i < 12) {
     if (i%2 == 0){
-        print("monkey");
-    } elif (i == 3) {
-        print("donky");
-    } else {
-        print("egg");
+        print("Donk");
+    } elif (i == 9) {
+        break;
     }
     i = i + 1;
 }

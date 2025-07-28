@@ -6,6 +6,7 @@ use std::cell::RefCell;
 
 pub fn run_script(source: String) -> eval::RuntimeVal{
     let ast = parser::generate_ast(source);
+    // println!("{:?}", ast);
     let mut environment = Rc::new(RefCell::new(environment::Environment {parent: None, variables: vec![]}));
     let evaluate = eval::eval_program(&ast, environment);
     evaluate

@@ -18,6 +18,7 @@ pub enum TokenType {
     Loop,
     Print,
     EOL,
+    Break,
     EOF
 }
 impl TokenType {
@@ -30,6 +31,7 @@ impl TokenType {
             "else" => Some(TokenType::Else),
             "elif" => Some(TokenType::ElseIf),
             "loop" => Some(TokenType::Loop),
+            "break" => Some(TokenType::Break),
             "print" => Some(TokenType::Print),
             _=>None
         }

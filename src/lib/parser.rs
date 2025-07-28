@@ -13,6 +13,7 @@ pub enum NodeType {
     Declaration,
     Scope,
     Loop,
+    Break,
     If,
     Else,
     ElseIf,
@@ -281,6 +282,11 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
                     return ret
                 }
                 panic!()
+            }
+            lexer::TokenType::Break => {
+                let ret = Node {node_type: NodeType::Break, value: None, body: vec![]};
+                tokens.pop();
+                ret
             }
             _ => panic!("{:?}", tokens.at().token_type)
         }
