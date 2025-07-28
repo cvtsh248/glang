@@ -594,6 +594,7 @@ fn eval_binary_expr(node: &parser::Node, env: Rc<RefCell<environment::Environmen
 pub fn eval_program(program: &parser::Node, env: Rc<RefCell<environment::Environment>>) -> RuntimeVal{
     let mut last_eval: RuntimeVal = RuntimeVal { runtime_val_type: RuntimeValType::Null };
     let mut loop_flag = false;
+    let mut if_check_fail_flag = false;
     let mut loop_condition: Option<&parser::Node> = None;
     let mut loop_node: Option<&parser::Node> = None;
     let mut program_counter: usize = 0;
@@ -630,9 +631,33 @@ pub fn eval_program(program: &parser::Node, env: Rc<RefCell<environment::Environ
                 eval_program(node,new_env);
                 program_counter += 1;
             } else {
+                if_check_fail_flag = true;
                 program_counter += 1;
             }
 
+        } else if matches!(node.node_type, parser::NodeType::ElseIf) {
+            let if_condition = &node.body[0];
+            let if_condition_eval = eval(if_condition, env.clone());
+
+            if *if_condition_eval.runtime_val_type.extract_bool_value().unwrap() == true && if_check_fail_flag == true {
+                let mut new_env = Rc::new(RefCell::new(environment::Environment {parent: Some(env.clone()), variables: vec![]})); 
+                eval_program(node,new_env);
+                if_check_fail_flag = false;
+                program_counter += 1;
+            } else {
+                if_check_fail_flag = true;
+                program_counter += 1;
+            }
+
+        } else if matches!(node.node_type, parser::NodeType::Else){
+            if if_check_fail_flag == true {
+                let mut new_env = Rc::new(RefCell::new(environment::Environment {parent: Some(env.clone()), variables: vec![]})); 
+                eval_program(node,new_env);
+                program_counter += 1;
+                if_check_fail_flag = false;
+            } else {
+                program_counter += 1;
+            }
         } else if matches!(node.node_type, parser::NodeType::Scope){
             let mut new_env = Rc::new(RefCell::new(environment::Environment {parent: Some(env.clone()), variables: vec![]})); 
             

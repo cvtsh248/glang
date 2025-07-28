@@ -14,6 +14,8 @@ pub enum NodeType {
     Scope,
     Loop,
     If,
+    Else,
+    ElseIf,
     Print,
     EOL
 }
@@ -205,10 +207,10 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
                 tokens.pop();
                 if matches!(tokens.at().token_type, lexer::TokenType::OpenBracket){
                     let mut body: Vec<Node> = vec![]; // Zeroeth item in body is condition, next is scope
-                        while !matches!(tokens.at().token_type, lexer::TokenType::EOF) && !matches!(tokens.at().token_type, lexer::TokenType::EOL) && !matches!(tokens.at().token_type, lexer::TokenType::CloseBracket) {
-                            tokens.pop();
-                            body.push(self.parse_expr(tokens));
-                        }
+                    while !matches!(tokens.at().token_type, lexer::TokenType::EOF) && !matches!(tokens.at().token_type, lexer::TokenType::EOL) && !matches!(tokens.at().token_type, lexer::TokenType::CloseBracket) {
+                        tokens.pop();
+                        body.push(self.parse_expr(tokens));
+                    }
                     tokens.pop();
                     if matches!(tokens.at().token_type, lexer::TokenType::OpenCurlyBracket){
                         body.push(self.parse_expr(tokens));
@@ -218,6 +220,35 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
                     panic!()
                 }
                 panic!()
+            },
+            lexer::TokenType::ElseIf => {
+                tokens.pop();
+                if matches!(tokens.at().token_type, lexer::TokenType::OpenBracket){
+                    let mut body: Vec<Node> = vec![]; // Zeroeth item in body is condition, next is scope
+                    while !matches!(tokens.at().token_type, lexer::TokenType::EOF) && !matches!(tokens.at().token_type, lexer::TokenType::EOL) && !matches!(tokens.at().token_type, lexer::TokenType::CloseBracket) {
+                        tokens.pop();
+                        body.push(self.parse_expr(tokens));
+                    }
+                    tokens.pop();
+                    if matches!(tokens.at().token_type, lexer::TokenType::OpenCurlyBracket){
+                        body.push(self.parse_expr(tokens));
+                        let ret = Node {node_type: NodeType::ElseIf, value: None, body: body};
+                        return ret
+                    } 
+                    panic!()
+                }
+                panic!()
+            },
+            lexer::TokenType::Else => {
+                tokens.pop();
+                let mut body: Vec<Node> = vec![]; // Scope
+                if matches!(tokens.at().token_type, lexer::TokenType::OpenCurlyBracket){
+                    body.push(self.parse_expr(tokens));
+                    let ret = Node {node_type: NodeType::Else, value: None, body: body};
+                    return ret
+                } 
+                panic!()
+
             },
             lexer::TokenType::Loop => {
                 tokens.pop();

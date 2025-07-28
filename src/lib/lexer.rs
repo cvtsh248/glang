@@ -13,6 +13,8 @@ pub enum TokenType {
     Let,
     Punctuation(String),
     If,
+    Else,
+    ElseIf,
     Loop,
     Print,
     EOL,
@@ -25,6 +27,8 @@ impl TokenType {
             "true" => Some(TokenType::Boolean(true)),
             "false" => Some(TokenType::Boolean(false)),
             "if" => Some(TokenType::If),
+            "else" => Some(TokenType::Else),
+            "elif" => Some(TokenType::ElseIf),
             "loop" => Some(TokenType::Loop),
             "print" => Some(TokenType::Print),
             _=>None

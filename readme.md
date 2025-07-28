@@ -38,7 +38,7 @@ This is an interpreted language written in Rust that I've been writing for fun. 
 #### Control flow
 * Variable declaration: `let x = 10;`
 * Loops: `loop (condition) { ... }`
-* Conditionals: `if (condition) { ... }`
+* Conditionals: `if (condition) { ... } elif (condition) { ... } else { ... }`, 
 * Scopes (creastes new environment): `{ ... }`
 * Print: `print(expression);`
 
@@ -51,7 +51,6 @@ Examples can be found in `demo_scripts`
 ### Todo
 Once I complete the following I'll probably no longer touch the project:
 * Break loops
-* Else statements for control flow
 * Arrays
 * Functions
 * Structs (or something of the sort)

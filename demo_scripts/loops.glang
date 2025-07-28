@@ -1,7 +1,11 @@
 let i = 1;
-loop (i < 6) {
+loop (i < 9) {
     if (i%2 == 0){
         print("monkey");
+    } elif (i == 3) {
+        print("donky");
+    } else {
+        print("egg");
     }
     i = i + 1;
 }
