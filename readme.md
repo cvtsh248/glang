@@ -1,5 +1,5 @@
 # Glang
-This is an interpreted language written in Rust that I've been writing for fun. I started off by watching the first 3 videos of Tyler Laceby's "Build a custom scripting language in typescript" videos (https://www.youtube.com/playlist?list=PL_2VhOvlMk4UHGqYCLWc6GO8FaPl8fQTh) and then set off from there. 
+This is a dynamically typed interpreted language written in Rust that I've been writing for fun. I started off by watching the first 3 videos of Tyler Laceby's "Build a custom scripting language in typescript" videos (https://www.youtube.com/playlist?list=PL_2VhOvlMk4UHGqYCLWc6GO8FaPl8fQTh) and then set off from there. 
 
 ### Project Structure
 #### Lexer (lexer.rs)
@@ -51,7 +51,6 @@ Examples can be found in `demo_scripts`
 
 ### Todo
 Once I complete the following I'll probably no longer touch the project:
-* Break loops
 * Arrays
 * Functions
 * Structs (or something of the sort)

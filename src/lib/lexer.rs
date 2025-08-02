@@ -19,6 +19,7 @@ pub enum TokenType {
     Print,
     EOL,
     Break,
+    Function,
     EOF
 }
 impl TokenType {
@@ -33,6 +34,7 @@ impl TokenType {
             "loop" => Some(TokenType::Loop),
             "break" => Some(TokenType::Break),
             "print" => Some(TokenType::Print),
+            "func" => Some(TokenType::Function),
             _=>None
         }
         
@@ -415,6 +417,10 @@ pub fn tokenise(source: String) -> TokenStream {
         } else if source_datastream.at() == '.' {
             tokens.push(Token {
                 token_type: TokenType::Punctuation(".".to_string())
+            });
+        } else if source_datastream.at() == ',' {
+            tokens.push(Token {
+                token_type: TokenType::Punctuation(",".to_string())
             });
         } else if source_datastream.at() == ' ' || source_datastream.at() == '\n'{
             // Do nothing

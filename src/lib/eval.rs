@@ -194,7 +194,7 @@ pub fn eval_numeric_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator:
             let left_type = &left.runtime_val_type;
             let right_type = &right.runtime_val_type;
 
-            if matches!(left_type, right_type){
+            if std::mem::discriminant(left_type) == std::mem::discriminant(right_type){
                 match left_type {
                     RuntimeValType::NumericInteger(_) => {
                         let left_value = left_type.extract_int_value().unwrap();
@@ -215,14 +215,23 @@ pub fn eval_numeric_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator:
                 }
 
             } else {
-                panic!("Mismatched types")
+                if matches!(right_type, RuntimeValType::NumericInteger(_)) {
+                    let left_value = left_type.extract_float_value().unwrap();
+                    let right_value = right_type.extract_int_value().unwrap();
+                    let right_value_float: f64 = *right_value as f64;
+                        RuntimeVal {
+                            runtime_val_type: RuntimeValType::NumericFloat(*left_value + right_value_float)
+                        }
+                } else {
+                    panic!("Cannot conver type string into float");
+                }
             }
         },
         "-" => {
             let left_type = &left.runtime_val_type;
             let right_type = &right.runtime_val_type;
 
-            if matches!(left_type, right_type){
+            if std::mem::discriminant(left_type) == std::mem::discriminant(right_type){
                 match left_type {
                     RuntimeValType::NumericInteger(_) => {
                         let left_value = left_type.extract_int_value().unwrap();
@@ -242,14 +251,23 @@ pub fn eval_numeric_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator:
                 }
 
             } else {
-                panic!("Mismatched types")
+                if matches!(right_type, RuntimeValType::NumericInteger(_)) {
+                    let left_value = left_type.extract_float_value().unwrap();
+                    let right_value = right_type.extract_int_value().unwrap();
+                    let right_value_float: f64 = *right_value as f64;
+                        RuntimeVal {
+                            runtime_val_type: RuntimeValType::NumericFloat(*left_value - right_value_float)
+                        }
+                } else {
+                    panic!("Cannot conver type string into float");
+                }
             }
         },
         "*" => {
             let left_type = &left.runtime_val_type;
             let right_type = &right.runtime_val_type;
 
-            if matches!(left_type, right_type){
+            if std::mem::discriminant(left_type) == std::mem::discriminant(right_type){
                 match left_type {
                     RuntimeValType::NumericInteger(_) => {
                         let left_value = left_type.extract_int_value().unwrap();
@@ -269,14 +287,23 @@ pub fn eval_numeric_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator:
                 }
 
             } else {
-                panic!("Mismatched types")
+                if matches!(right_type, RuntimeValType::NumericInteger(_)) {
+                    let left_value = left_type.extract_float_value().unwrap();
+                    let right_value = right_type.extract_int_value().unwrap();
+                    let right_value_float: f64 = *right_value as f64;
+                        RuntimeVal {
+                            runtime_val_type: RuntimeValType::NumericFloat(*left_value * right_value_float)
+                        }
+                } else {
+                    panic!("Cannot conver type string into float");
+                }
             }
         },
         "/" => {
             let left_type = &left.runtime_val_type;
             let right_type = &right.runtime_val_type;
 
-            if matches!(left_type, right_type){
+            if std::mem::discriminant(left_type) == std::mem::discriminant(right_type){
                 match left_type {
                     RuntimeValType::NumericInteger(_) => {
                         let left_value = left_type.extract_int_value().unwrap();
@@ -296,14 +323,23 @@ pub fn eval_numeric_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator:
                 }
 
             } else {
-                panic!("Mismatched types")
+                if matches!(right_type, RuntimeValType::NumericInteger(_)) {
+                    let left_value = left_type.extract_float_value().unwrap();
+                    let right_value = right_type.extract_int_value().unwrap();
+                    let right_value_float: f64 = *right_value as f64;
+                        RuntimeVal {
+                            runtime_val_type: RuntimeValType::NumericFloat(*left_value / right_value_float)
+                        }
+                } else {
+                    panic!("Cannot conver type string into float");
+                }
             }
         },
         "%" => {
             let left_type = &left.runtime_val_type;
             let right_type = &right.runtime_val_type;
 
-            if matches!(left_type, right_type){
+            if std::mem::discriminant(left_type) == std::mem::discriminant(right_type){
                 match left_type {
                     RuntimeValType::NumericInteger(_) => {
                         let left_value = left_type.extract_int_value().unwrap();
@@ -323,14 +359,23 @@ pub fn eval_numeric_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator:
                 }
 
             } else {
-                panic!("Mismatched types")
+                if matches!(right_type, RuntimeValType::NumericInteger(_)) {
+                    let left_value = left_type.extract_float_value().unwrap();
+                    let right_value = right_type.extract_int_value().unwrap();
+                    let right_value_float: f64 = *right_value as f64;
+                        RuntimeVal {
+                            runtime_val_type: RuntimeValType::NumericFloat(*left_value % right_value_float)
+                        }
+                } else {
+                    panic!("Cannot conver type string into float");
+                }
             }
         },
         "**" => {
             let left_type = &left.runtime_val_type;
             let right_type = &right.runtime_val_type;
 
-            if matches!(left_type, right_type){
+            if std::mem::discriminant(left_type) == std::mem::discriminant(right_type){
                 match left_type {
                     RuntimeValType::NumericInteger(_) => {
                         let left_value = left_type.extract_int_value().unwrap();
@@ -358,7 +403,7 @@ pub fn eval_numeric_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator:
             let left_type = &left.runtime_val_type;
             let right_type = &right.runtime_val_type;
 
-            if matches!(left_type, right_type){
+            if std::mem::discriminant(left_type) == std::mem::discriminant(right_type){
                 match left_type {
                     RuntimeValType::NumericInteger(_) => {
                         let left_value = left_type.extract_int_value().unwrap();
@@ -378,14 +423,23 @@ pub fn eval_numeric_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator:
                 }
 
             } else {
-                panic!("Mismatched types")
+                if matches!(right_type, RuntimeValType::NumericInteger(_)) {
+                    let left_value = left_type.extract_float_value().unwrap();
+                    let right_value = right_type.extract_int_value().unwrap();
+                    let right_value_float: f64 = *right_value as f64;
+                        RuntimeVal {
+                            runtime_val_type: RuntimeValType::Boolean(*left_value == right_value_float)
+                        }
+                } else {
+                    panic!("Cannot conver type string into float");
+                }
             }
         },
         "!=" => {
             let left_type = &left.runtime_val_type;
             let right_type = &right.runtime_val_type;
 
-            if matches!(left_type, right_type){
+            if std::mem::discriminant(left_type) == std::mem::discriminant(right_type){
                 match left_type {
                     RuntimeValType::NumericInteger(_) => {
                         let left_value = left_type.extract_int_value().unwrap();
@@ -405,14 +459,23 @@ pub fn eval_numeric_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator:
                 }
 
             } else {
-                panic!("Mismatched types")
+                if matches!(right_type, RuntimeValType::NumericInteger(_)) {
+                    let left_value = left_type.extract_float_value().unwrap();
+                    let right_value = right_type.extract_int_value().unwrap();
+                    let right_value_float: f64 = *right_value as f64;
+                        RuntimeVal {
+                            runtime_val_type: RuntimeValType::Boolean(*left_value != right_value_float)
+                        }
+                } else {
+                    panic!("Cannot conver type string into float");
+                }
             }
         },
         ">" => {
             let left_type = &left.runtime_val_type;
             let right_type = &right.runtime_val_type;
 
-            if matches!(left_type, right_type){
+            if std::mem::discriminant(left_type) == std::mem::discriminant(right_type){
                 match left_type {
                     RuntimeValType::NumericInteger(_) => {
                         let left_value = left_type.extract_int_value().unwrap();
@@ -432,14 +495,23 @@ pub fn eval_numeric_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator:
                 }
 
             } else {
-                panic!("Mismatched types")
+                if matches!(right_type, RuntimeValType::NumericInteger(_)) {
+                    let left_value = left_type.extract_float_value().unwrap();
+                    let right_value = right_type.extract_int_value().unwrap();
+                    let right_value_float: f64 = *right_value as f64;
+                        RuntimeVal {
+                            runtime_val_type: RuntimeValType::Boolean(*left_value > right_value_float)
+                        }
+                } else {
+                    panic!("Cannot conver type string into float");
+                }
             }
         },
         "<" => {
             let left_type = &left.runtime_val_type;
             let right_type = &right.runtime_val_type;
 
-            if matches!(left_type, right_type){
+            if std::mem::discriminant(left_type) == std::mem::discriminant(right_type){
                 match left_type {
                     RuntimeValType::NumericInteger(_) => {
                         let left_value = left_type.extract_int_value().unwrap();
@@ -459,14 +531,23 @@ pub fn eval_numeric_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator:
                 }
 
             } else {
-                panic!("Mismatched types")
+                if matches!(right_type, RuntimeValType::NumericInteger(_)) {
+                    let left_value = left_type.extract_float_value().unwrap();
+                    let right_value = right_type.extract_int_value().unwrap();
+                    let right_value_float: f64 = *right_value as f64;
+                        RuntimeVal {
+                            runtime_val_type: RuntimeValType::Boolean(*left_value < right_value_float)
+                        }
+                } else {
+                    panic!("Cannot conver type string into float");
+                }
             }
         },
         ">=" => {
             let left_type = &left.runtime_val_type;
             let right_type = &right.runtime_val_type;
 
-            if matches!(left_type, right_type){
+            if std::mem::discriminant(left_type) == std::mem::discriminant(right_type){
                 match left_type {
                     RuntimeValType::NumericInteger(_) => {
                         let left_value = left_type.extract_int_value().unwrap();
@@ -486,14 +567,23 @@ pub fn eval_numeric_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator:
                 }
 
             } else {
-                panic!("Mismatched types")
+                if matches!(right_type, RuntimeValType::NumericInteger(_)) {
+                    let left_value = left_type.extract_float_value().unwrap();
+                    let right_value = right_type.extract_int_value().unwrap();
+                    let right_value_float: f64 = *right_value as f64;
+                        RuntimeVal {
+                            runtime_val_type: RuntimeValType::Boolean(*left_value >= right_value_float)
+                        }
+                } else {
+                    panic!("Cannot conver type string into float");
+                }
             }
         },
         "<=" => {
             let left_type = &left.runtime_val_type;
             let right_type = &right.runtime_val_type;
 
-            if matches!(left_type, right_type){
+            if std::mem::discriminant(left_type) == std::mem::discriminant(right_type){
                 match left_type {
                     RuntimeValType::NumericInteger(_) => {
                         let left_value = left_type.extract_int_value().unwrap();
@@ -513,7 +603,16 @@ pub fn eval_numeric_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator:
                 }
 
             } else {
-                panic!("Mismatched types")
+                if matches!(right_type, RuntimeValType::NumericInteger(_)) {
+                    let left_value = left_type.extract_float_value().unwrap();
+                    let right_value = right_type.extract_int_value().unwrap();
+                    let right_value_float: f64 = *right_value as f64;
+                        RuntimeVal {
+                            runtime_val_type: RuntimeValType::Boolean(*left_value <= right_value_float)
+                        }
+                } else {
+                    panic!("Cannot conver type string into float");
+                }
             }
         },
         _ => {
@@ -528,7 +627,7 @@ fn eval_bool_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator: &str) 
             let left_type = &left.runtime_val_type;
             let right_type = &right.runtime_val_type;
 
-            if matches!(left_type, right_type){
+            if std::mem::discriminant(left_type) == std::mem::discriminant(right_type){
                 match left_type {
                     RuntimeValType::Boolean(_) => {
                         let left_value = left_type.extract_bool_value().unwrap();
@@ -548,7 +647,7 @@ fn eval_bool_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator: &str) 
             let left_type = &left.runtime_val_type;
             let right_type = &right.runtime_val_type;
 
-            if matches!(left_type, right_type){
+            if std::mem::discriminant(left_type) == std::mem::discriminant(right_type){
                 match left_type {
                     RuntimeValType::Boolean(_) => {
                         let left_value = left_type.extract_bool_value().unwrap();
@@ -568,7 +667,7 @@ fn eval_bool_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator: &str) 
             let left_type = &left.runtime_val_type;
             let right_type = &right.runtime_val_type;
 
-            if matches!(left_type, right_type){
+            if std::mem::discriminant(left_type) == std::mem::discriminant(right_type){
                 match left_type {
                     RuntimeValType::Boolean(_) => {
                         let left_value = left_type.extract_bool_value().unwrap();
@@ -588,7 +687,7 @@ fn eval_bool_binary_expr(left: &RuntimeVal, right: &RuntimeVal, operator: &str) 
             let left_type = &left.runtime_val_type;
             let right_type = &right.runtime_val_type;
 
-            if matches!(left_type, right_type){
+            if std::mem::discriminant(left_type) == std::mem::discriminant(right_type){
                 match left_type {
                     RuntimeValType::Boolean(_) => {
                         let left_value = left_type.extract_bool_value().unwrap();
@@ -614,15 +713,17 @@ fn eval_binary_expr(node: &parser::Node, env: Rc<RefCell<environment::Environmen
     let left = eval(&node.body[0], env.clone());
     let right = eval(&node.body[1], env.clone());
 
-    if matches!(left.runtime_val_type, RuntimeValType::NumericInteger(_)) && matches!(right.runtime_val_type, RuntimeValType::NumericInteger(_)){
-        eval_numeric_binary_expr(&left, &right, node.node_type.extract_binexp_operator().unwrap())
-    } else if matches!(left.runtime_val_type, RuntimeValType::NumericFloat(_)) && matches!(right.runtime_val_type, RuntimeValType::NumericFloat(_)) {
-        eval_numeric_binary_expr(&left, &right, node.node_type.extract_binexp_operator().unwrap())
-    } else if matches!(left.runtime_val_type, RuntimeValType::Boolean(_)) && matches!(right.runtime_val_type, RuntimeValType::Boolean(_)) {
-        eval_bool_binary_expr(&left, &right, node.node_type.extract_binexp_operator().unwrap())
-    } else {
-        panic!("Mismatched types")
-    }
+    eval_numeric_binary_expr(&left, &right, node.node_type.extract_binexp_operator().unwrap())
+
+    // if matches!(left.runtime_val_type, RuntimeValType::NumericInteger(_)) && matches!(right.runtime_val_type, RuntimeValType::NumericInteger(_)){
+    //     eval_numeric_binary_expr(&left, &right, node.node_type.extract_binexp_operator().unwrap())
+    // } else if matches!(left.runtime_val_type, RuntimeValType::NumericFloat(_)) && matches!(right.runtime_val_type, RuntimeValType::NumericFloat(_)) {
+    //     eval_numeric_binary_expr(&left, &right, node.node_type.extract_binexp_operator().unwrap())
+    // } else if matches!(left.runtime_val_type, RuntimeValType::Boolean(_)) && matches!(right.runtime_val_type, RuntimeValType::Boolean(_)) {
+    //     eval_bool_binary_expr(&left, &right, node.node_type.extract_binexp_operator().unwrap())
+    // } else {
+    //     panic!("Mismatched types")
+    // }
 }
 
 pub fn eval_program(program: &parser::Node, env: Rc<RefCell<environment::Environment>>) -> RuntimeVal{
