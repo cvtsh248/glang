@@ -831,7 +831,7 @@ pub fn eval_program(program: &parser::Node, env: Rc<RefCell<environment::Environ
                 
                 };
             }
-            println!("{:?}",function);
+            // println!("{:?}",function);
             let mut new_env = Rc::new(RefCell::new(environment::Environment {parent: Some(env.clone()), variables: vec![], functions: vec![]})); 
             // println!("{:?}", function);
             eval_program(&function, new_env);
