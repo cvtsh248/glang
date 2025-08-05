@@ -20,6 +20,8 @@ pub enum TokenType {
     EOL,
     Break,
     Function,
+    FunctionCall(String),
+    Return,
     EOF
 }
 impl TokenType {
@@ -73,6 +75,8 @@ impl TokenType {
             Some(str)
         } else if  let TokenType::Punctuation(str) = self {
             Some(str)
+        } else if let TokenType::FunctionCall(str) = self {
+            Some(str) 
         } else {
             None
         }
@@ -81,6 +85,14 @@ impl TokenType {
     pub fn extract_bool_value(&self) -> Option<&bool> {
         if let TokenType::Boolean(boolean) = self {
             Some(boolean)
+        } else {
+            None
+        }
+    }
+
+    pub fn extract_fncall_identifier(&self) -> Option<&String> {
+        if let TokenType::FunctionCall(identifier) = self {
+            Some(identifier)
         } else {
             None
         }
@@ -380,8 +392,12 @@ pub fn tokenise(source: String) -> TokenStream {
             let token_type = TokenType::check_reserved_keywords(&identifier_string);
 
             if token_type.is_some() {
-                    tokens.push(Token {
-                    token_type: token_type.expect("this is impossible to trigger")
+                tokens.push(Token {
+                    token_type: token_type.unwrap()
+                });
+            } else if source_datastream.characters[source_datastream.current_pos] == '(' {
+                tokens.push(Token {
+                    token_type: TokenType::FunctionCall(identifier_string)
                 });
             } else {
                 tokens.push(Token {

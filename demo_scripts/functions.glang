@@ -1,5 +1,4 @@
-func add(a, b) {
-    print(a+b);
+func add(a, b, f) {
+    print(a+b*f);
 }
-
-add(2, 3);
+add(2,9,2);

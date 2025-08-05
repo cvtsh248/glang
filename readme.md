@@ -10,7 +10,7 @@ This is a dynamically typed interpreted language written in Rust that I've been 
 #### Parser (parser.rs)
 * Generates an abstract syntax tree from the array of tokens generated in `lexer.rs`
 * Supports expressions, declerations, loops, conditionals, scoped blocks and assignments
-* AST node types currently include: `Program, NumericLiteral, StringLiteral, Boolean, Identifier, BinaryExpr, UnaryExpr, Assignment, Declaration, Scope, Loop, If, Print, EOL`
+* AST node types currently include: `Program, NumericLiteral, StringLiteral, Boolean, Identifier, BinaryExpr, UnaryExpr, Assignment, Declaration, Scope, Loop, If, Print, EOL, Function, FunctionCall`
 #### Environment (environment.rs)
 * Manages variable storage and scoping
 * Functions include variable declaration, assignment, lookup and environment resolution
@@ -29,6 +29,7 @@ This is a dynamically typed interpreted language written in Rust that I've been 
 * Floats
 * Booleans (i.e. `true, false`)
 * Strings
+* Functions (`func (a,b) {...}`) PARTIALLY implemented, only supports numeric types and no return, will add in due course
 
 #### Supported operators
 * Arithmetic (i.e. `+,-,*,/,%`)

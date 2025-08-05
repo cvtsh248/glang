@@ -1,6 +1,7 @@
 use super::eval;
 use std::rc::Rc;
 use std::cell::RefCell;
+use super::parser;
 #[derive(Debug, Clone)]
 pub struct Variable {
     pub name: String, // Should be identifier
@@ -8,9 +9,16 @@ pub struct Variable {
 }
 
 #[derive(Debug, Clone)]
+pub struct Function {
+    pub name: String,
+    pub content: Vec<parser::Node>
+}
+
+#[derive(Debug, Clone)]
 pub struct Environment {
     pub parent: Option<Rc<RefCell<Environment>>>,
-    pub variables: Vec<Variable>
+    pub variables: Vec<Variable>,
+    pub functions: Vec<Function>
 }
 
 pub fn resolve_env(env: Rc<RefCell<Environment>>, name: &str) -> Rc<RefCell<Environment>>{
@@ -68,3 +76,50 @@ pub fn lookup_variable (env: Rc<RefCell<Environment>>, identifier: &str) -> eval
 }
 
 
+pub fn resolve_env_func(env: Rc<RefCell<Environment>>, name: &str) -> Rc<RefCell<Environment>>{
+    let env_rc = env.borrow();
+    for function in env_rc.functions.clone() {
+        if function.name == name {
+            return env.clone()
+        }
+    }
+
+    if let Some(ref parent) = env.borrow().parent {
+        return resolve_env_func(parent.clone(), name)
+    } 
+
+    panic!("Cannot resolve environment")
+}
+
+pub fn declare_function (env: Rc<RefCell<Environment>>, identifier: &str, content: &Vec<parser::Node>) -> eval::RuntimeVal{
+    let mut env_rc = env.borrow_mut();
+    for variable in env_rc.variables.clone() {
+        if variable.name == identifier {
+            panic!("Variable already defined: {:?}", variable.name)
+        } else {
+            env_rc.functions.push(Function { name: identifier.to_string(), content: content.clone() });
+            return eval::RuntimeVal {
+                runtime_val_type: eval::RuntimeValType::Null
+            }
+        }
+    }
+    env_rc.functions.push(Function { name: identifier.to_string(), content: content.clone() });
+    return eval::RuntimeVal {
+        runtime_val_type: eval::RuntimeValType::Null
+    }
+}
+
+pub fn lookup_function (env: Rc<RefCell<Environment>>, identifier: &str) -> parser::Node {
+    let env_r = resolve_env_func(env, identifier);
+    let mut env_rc = env_r.borrow_mut();
+    for function in env_rc.functions.clone() {
+        if identifier == function.name {
+            return parser::Node {
+                node_type: parser::NodeType::Scope,
+                value: None, 
+                body: function.content
+            }
+        }
+    }
+    panic!("Function does not exist - {:?}", identifier)
+}

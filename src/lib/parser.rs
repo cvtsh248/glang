@@ -18,6 +18,8 @@ pub enum NodeType {
     Else,
     ElseIf,
     Print,
+    Function(String),
+    FunctionCall(String),
     EOL
 }
 impl NodeType {
@@ -59,6 +61,63 @@ impl Node { // Master node will ALWAYS be of type Program and will always have a
                 
                 return ret 
             }
+        } else if matches!(&tokens.at().token_type, lexer::TokenType::Function) {
+            tokens.pop();
+            let fn_identifier = tokens.at().clone();
+            let fn_identifier_str = fn_identifier.token_type.extract_str_value().unwrap();
+            tokens.pop();
+            if matches!(tokens.at().token_type, lexer::TokenType::OpenBracket){
+                let mut body: Vec<Node> = vec![]; // Zeroeth item in body is input, next is scope
+                let mut declarations: Vec<Node> = vec![]; // Zeroeth item of body; just a bunch of declarations for the scope
+                while !matches!(tokens.at().token_type, lexer::TokenType::CloseBracket) {
+                    tokens.pop();
+                    if matches!(tokens.at().token_type, lexer::TokenType::Punctuation(op) if op == ",".to_string()) || matches!(tokens.at().token_type, lexer::TokenType::CloseBracket){
+                        continue
+                    } else {
+                        declarations.push(Node {
+                            node_type: NodeType::Declaration,
+                            value: Some(tokens.at()), 
+                            body: vec![Node {
+                                node_type: NodeType::NumericLiteral,
+                                value: Some(lexer::Token { token_type: lexer::TokenType::Integer(0) }),
+                                body: vec![]
+                            }]
+                        });
+                    }
+                    // println!("{:?}",tokens);
+
+                }
+                tokens.pop();
+                if matches!(tokens.at().token_type, lexer::TokenType::OpenCurlyBracket){
+                    body.push(self.parse_expr(tokens));
+                    for node in declarations {
+                        body[0].body.insert(0,node); // Injecting declerations into scope, there's probably a way more efficient way of doing this
+                    }
+                    let ret = Node {node_type: NodeType::Function(fn_identifier_str.to_string()), value: None, body: body};
+                    return ret
+                } 
+                panic!()
+            }
+            panic!()
+        } else if matches!(&tokens.at().token_type, lexer::TokenType::FunctionCall(_)){
+            let op = &tokens.at().token_type;
+            let mut body: Vec<Node> = vec![]; // Body items are input values
+            tokens.pop();
+            if matches!(tokens.at().token_type, lexer::TokenType::OpenBracket){
+                while !matches!(tokens.at().token_type, lexer::TokenType::CloseBracket) {
+                    // println!("hi");
+                    tokens.pop();
+                    if matches!(tokens.at().token_type, lexer::TokenType::Punctuation(pn) if pn == ",".to_string()){
+                        tokens.pop();
+                    }
+                    body.push(self.parse_expr(tokens));
+                    // println!("{:?}",tokens);
+                }
+                tokens.pop();
+            }
+            
+            let ret = Node {node_type: NodeType::FunctionCall(op.extract_fncall_identifier().unwrap().to_string()), value: None, body: body};
+            ret
         } else {
             self.parse_expr(tokens)
         }
@@ -329,6 +388,8 @@ pub fn generate_ast(source: String) -> Node {
     };
 
     let mut tokens = lexer::tokenise(source);
+
+    // println!("{:?}",tokens);
 
     program.generate_ast(&mut tokens);
 
